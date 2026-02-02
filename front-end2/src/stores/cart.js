@@ -22,7 +22,7 @@ export const useCartStore = defineStore('cart', {
         addToCart(product) {
             const existing = this.items.find(i => i.id === product.id)
             if (existing) {
-                if (existing.quantity < product.stock) {
+                if (!product.stock || existing.quantity < product.stock) {
                     existing.quantity += (product.quantity || 1)
                 } else {
                     Swal.fire('提示', '已達庫存上限', 'warning')

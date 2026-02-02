@@ -6,8 +6,13 @@ const router = useRouter();
 const cartStore = useCartStore()
 
 const goToCheckOut = () =>{
-    //點擊進入商品詳情
+    //點擊進入結帳
     router.push({name:'checkOut'});
+};
+
+const backToShop = () =>{
+    //點擊返回選購商品
+    router.push({name:'ShopStore'});
 };
 </script>
 
@@ -76,7 +81,7 @@ const goToCheckOut = () =>{
     <hr/>
     <div class="action-buttons-row">
         <div class="button-group-right" v-if="cartStore.items.length">
-            <button type="button"   class="btnBackToShop "  data-bs-toggle="modal" data-bs-target="#exampleModal"  @click="goToCheckOut">
+            <button type="button"   class="btnBackToShop "  data-bs-toggle="modal" data-bs-target="#exampleModal"  @click="backToShop">
                 繼續選購
             </button>
         </div>

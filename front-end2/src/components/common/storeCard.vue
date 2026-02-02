@@ -20,7 +20,9 @@ const addToCart = (item) => {
         name: item.productName,
         price: item.price,
         image: item.image,
-        description: item.description
+        description: item.description,
+        stock:item.stock ?? 99,
+        quantity: 1
     })
     
     Swal.fire({
@@ -70,7 +72,7 @@ const productsList = computed(()=>{
             <div class="price text-success">NT$ {{item.price}}</div>
         </div>
         <div class="card-footer">
-            <button class="btnBuy "   @click="addToCart(item)" @click.stop="加入購物車">加入購物車</button>
+            <button class="btnBuy "    @click.stop="addToCart(item)">加入購物車</button>
 
         </div>
     </div>
