@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router';
 import BaseCard from '@/components/common/BaseCard.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
 
-
 const router = useRouter();
 const email = ref('');
 const password = ref('');
@@ -31,22 +30,45 @@ const handleLogin = () => {
       <form @submit.prevent="handleLogin">
         <div class="mb-4">
           <label for="email" class="form-label text-gdg fw-medium">電子郵件</label>
-          <input type="email" id="email" v-model="email" class="form-control form-control-lg rounded-0 border-gdg-light"
-            placeholder="example@email.com" required>
+          <input 
+            type="email" 
+            id="email" 
+            v-model="email" 
+            class="form-control form-control-lg rounded-0 border-gdg-light" 
+            placeholder="example@email.com"
+            required
+          >
         </div>
-
+        
         <div class="mb-4">
           <label for="password" class="form-label text-gdg fw-medium">密碼</label>
-          <input type="password" id="password" v-model="password"
-            class="form-control form-control-lg rounded-0 border-gdg-light" placeholder="輸入密碼" required>
+          <input 
+            type="password" 
+            id="password" 
+            v-model="password" 
+            class="form-control form-control-lg rounded-0 border-gdg-light" 
+            placeholder="輸入密碼"
+            required
+          >
         </div>
 
         <div class="d-grid gap-3 pt-2">
-          <BaseButton color="gdg" size="lg" label="立即登入" @click="handleLogin" />
-
+          <BaseButton 
+            color="gdg" 
+            size="lg" 
+            label="立即登入" 
+            @click="handleLogin"
+          />
+          
           <div class="text-center">
             <span class="text-muted small">尚未擁有帳號？</span>
-            <BaseButton color="outline-gdg" size="sm" label="註冊會員" class="ms-2 border-0" @click="goToRegister" />
+            <BaseButton 
+              color="outline-gdg" 
+              size="sm" 
+              label="註冊會員" 
+              class="ms-2 border-0"
+              @click="goToRegister"
+            />
           </div>
         </div>
       </form>
