@@ -1,0 +1,245 @@
+/* -----------------------------
+Global
+------------------------------ */
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #fff;
+    color: #adafb0;
+}
+
+
+
+/* -----------------------------
+商品區塊 Container
+------------------------------ */
+.shop-container {
+    padding: 80px 40px;
+}
+
+
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    justify-items: center;
+}
+
+
+/* -----------------------------
+卡片 Card
+------------------------------ */
+.card {
+    width: 450px;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    position: relative;
+    justify-items: center;
+
+
+}
+
+
+.card-cart {
+    width: 1000px;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    position: relative;
+}
+
+
+.card img {
+    width: 100%;
+    display: block;
+}
+
+
+.card-body {
+    padding: 20px;
+    text-align: center;
+}
+
+
+.card-body h5 {
+    margin: 0 0 12px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+
+.card-body .price {
+    font-size: 18px;
+    color: #333;
+}
+
+
+
+
+
+
+/* -----------------------------
+卡片底部按鈕
+------------------------------ */
+.card-footer {
+    padding: 18px;
+    text-align: center;
+
+}
+
+.action-buttons-row {
+    display: flex;
+    /* 開啟 Flex 佈局 */
+    gap: 10px;
+    /* 兩個按鈕之間的間距 */
+    justify-content: flex-end;
+
+    margin-top: 20px;
+    /* 與上方內容的距離 */
+}
+
+.button-group-right {
+    display: flex;
+    /* 關鍵：讓內容全部靠右 */
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 80px;
+
+    /* 兩個按鈕之間的間距 */
+}
+
+.back-button {
+    flex: 1;
+    text-align: left;
+
+}
+
+.btnBuy {
+
+    background: #9f9572;
+    padding: 10px 120px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 16px;
+    border: 0;
+
+    &:hover {
+        background-color: #e4e0d3;
+        color: #9f9572;
+    }
+}
+
+.btnBackToShop {
+
+    padding: 10px 120px;
+    border-radius: 6px;
+    color: #9f9572;
+    font-size: 16px;
+    border: 0;
+
+    &:hover {
+        background-color: #9f9572;
+        color: #fff;
+    }
+}
+
+.lock-button {
+    background-color: white;
+    /* 設置背景為白色 */
+    color: black;
+    /* 設置文字為黑色 */
+    border: 1px solid #ccc;
+    /* 加上邊框以防與背景融為一體 */
+}
+
+.text-right {
+    text-align: right;
+    padding-bottom: 10px;
+    padding-right: 30px;
+    padding-top: 30px"
+
+}
+
+.button-right {
+    flex: 1;
+    text-align: right;
+    padding-bottom: 50px;
+    padding-right: 30px;
+    padding-top: 20px"
+
+}
+
+
+
+/* -----------------------------
+Quantity Selector
+------------------------------ */
+.stepper-container {
+    display: inline-flex;
+    /* 移除外層所有間距，確保三個方塊緊貼 */
+    gap: 0;
+    align-items: center;
+    flex-wrap: nowrap;
+
+}
+
+/* 左右咖啡色方塊 */
+.square-btn {
+    width: 30px;
+    height: 30px;
+    background-color: #c3ba97;
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #e4e0d3;
+        color: #9f9572;
+    }
+}
+
+.square-btn:hover {
+    background-color: #c3ba97;
+}
+
+/* 中間白色方塊 */
+.square-num {
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    color: #c3ba97;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-weight: md;
+    /* 設定上下邊框，不設定左右邊框來達到併在一起的視覺感 */
+    border-top: 0.1px solid #c3ba97;
+    border-bottom: 0.1px solid #c3ba97;
+    border-left: none;
+    border-right: none;
+}
+
+/* 左側方塊的左圓角 */
+.left-round {
+    border-radius: 4px 0 0 4px;
+}
+
+/* 右側方塊的右圓角 */
+.right-round {
+    border-radius: 0 4px 4px 0;
+}
