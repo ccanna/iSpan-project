@@ -196,15 +196,13 @@ public class StoreRegistrationService {
         storeInfo.setAddress(newAddress);
 
         // 呼叫 Mapbox API 轉換地址
-        double[] coords = mapboxService.getCoordinate(registration.getAddress());
+        BigDecimal[] coords = mapboxService.getCoordinate(registration.getAddress());
 
         if (coords != null && coords.length >= 2) {
-            // 使用 BigDecimal.valueOf 將 double 轉為 BigDecimal
-            storeInfo.setLatitude(BigDecimal.valueOf(coords[0])); // 緯度
-            storeInfo.setLongitude(BigDecimal.valueOf(coords[1])); // 經度
+            storeInfo.setLatitude(coords[0]); // 緯度
+            storeInfo.setLongitude(coords[1]); // 經度
 
         } else {
-            // 建議至少打印日誌，避免轉換失敗卻不知道原因
             System.err.println("警告：地址轉換經緯度失敗，地址為：" + newAddress);
         }
         // ------------------
