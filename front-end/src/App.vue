@@ -5,6 +5,14 @@
 // import BlankLayout from '@/layouts/blank.vue';
 import Navbar from '@/layouts/navbar.vue';
 import Footer from '@/layouts/footer.vue';
+import { onMounted } from 'vue';
+import { useProductsDepot } from '@/stores/productsDepot';
+
+const depot = useProductsDepot();
+
+onMounted(async () => {
+  await depot.fetchProducts();
+});
 // const route = useRoute();
 
 // const layout = computed(() => {

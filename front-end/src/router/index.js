@@ -67,12 +67,13 @@ const routes = [
   {
     path: '/shopStore',
     component: () => import('@/views/shopStore.vue'),
-    name: 'ShopStore'
+    name: 'ShopStore',
   },
   {
     path: '/Cart',
     component: () => import('@/views/shopCart.vue'),
-    name: 'ShopCart'
+    name: 'ShopCart',
+    meta: { requiresAuth: true }
   },
   {
     path: '/storeInfo/:id?',
@@ -288,11 +289,23 @@ const router = createRouter({
 import { useAuthStore } from '@/stores/auth';
 import { useAdminAuthStore } from '@/stores/adminAuth';
 import Swal from 'sweetalert2';
+import { useCartStore } from '@/stores/cart';
 
 // 路由守衛
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const adminAuthStore = useAdminAuthStore();
+
+
+  //for登出入狀態攔截，顯示購物車
+  const cartStore = useCartStore();
+  if (!authStore.isLoggedIn && cartStore.items.length > 0) {
+    cartStore.clearCart();
+  }
+  if (from.path === '/login' && authStore.isLoggedIn) {
+    cartStore.fetchCart();
+  }
+
 
   if (to.meta.requiresAdminAuth) {
     // [直接檢查 Local Storage 的方式]
@@ -314,6 +327,32 @@ router.beforeEach(async (to, from, next) => {
       return next('/admin/login');
     }
   }
+
+
+
+  //   //Anna改的，為了將目標登入後保留原始路徑返回前頁
+  //   if (to.meta.requiresAuth) {
+  //     if (authStore.isExpired || !authStore.isLoggedIn) {
+  //       sessionStorage.setItem('redirectPath', to.fullPath);        //將當前目標路徑存入瀏覽器站存
+
+
+  //       await authStore.handleLogoutAndNotify(authStore.isExpired ? 'timeout' : 'unauthorized');
+  //       return next({ name: 'Login', query: { redirect: to.fullPath } });
+  //     }
+  //   }
+
+  //   //當使用者從/login登入成功切換出來時，自動攔截並導向
+  //   if (from.path === '/login' && authStore.isLoggedIn) {
+  //     const savedPath = sessionStorage.getItem('redirectPath');
+  //     if (savedPath) {
+  //       sessionStorage.removeItem('redirectPath');
+  //       return next({ name: 'Login', query: { redirect: to.fullPath } });
+  //     }
+  //   }
+  //   next();
+
+  // });
+
 
   if (to.meta.requiresAuth) {
     if (authStore.isExpired) {
