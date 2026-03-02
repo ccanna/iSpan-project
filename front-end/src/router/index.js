@@ -75,14 +75,14 @@ const routes = [
     name: 'ShopCart'
   },
   {
+    path: '/storeInfo/reservation/:id',
+    name: 'Reservation',
+    component: () => import('@/views/ReservationView.vue'),
+  },
+  {
     path: '/storeInfo/:id?',
     name: 'StoreInfo',
     component: () => import('@/views/StoreInfoView.vue'),
-  },
-  {
-    path: '/storeInfo/reservation',
-    name: 'Reservation',
-    component: () => import('@/views/ReservationView.vue'),
   },
   {
     path: '/user/bookings',

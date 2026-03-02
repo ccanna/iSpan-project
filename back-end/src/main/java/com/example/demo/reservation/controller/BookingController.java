@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import com.example.demo.reservation.dto.BookingRequestDto;
 import com.example.demo.reservation.dto.BookingResponseDto;
 import com.example.demo.reservation.dto.SlotAvailDto;
 import com.example.demo.reservation.service.BookingService;
+import com.example.demo.store.dto.ReservationSettingsDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,14 @@ public class BookingController {
 
     private final BookingService bookingService;
 
+    // 取得店家訂位設定
+    @GetMapping("/config/{storeId}")
+    public ResponseEntity<ReservationSettingsDto> getStoreConfig(@PathVariable Integer storeId) {
+        ReservationSettingsDto config = bookingService.getStoreReservationConfig(storeId);
+        return ResponseEntity.ok(config);
+    }
+
+    // 取得某一天某桌型的可訂位時段
     @GetMapping("/available-slots")
     public ResponseEntity<List<SlotAvailDto>> getSlots(
             @RequestParam Integer storeId,
@@ -32,9 +42,10 @@ public class BookingController {
             @RequestParam Integer seatType) {
 
         List<SlotAvailDto> response = bookingService.getAvailableSlots(storeId, date, seatType);
-        return ResponseEntity.ok(response); // 回傳狀態 200 並帶上資料
+        return ResponseEntity.ok(response);
     }
 
+    // 建立訂位
     @PostMapping
     public ResponseEntity<BookingResponseDto> createBooking(@RequestBody BookingRequestDto dto) {
         BookingResponseDto response = bookingService.createBooking(dto);

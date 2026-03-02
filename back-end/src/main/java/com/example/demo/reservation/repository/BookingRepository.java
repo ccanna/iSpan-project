@@ -14,8 +14,8 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
         @Query("SELECT COUNT(b) FROM Booking b WHERE b.store.storeId = :storeId " +
                         "AND b.bookingDate = :date AND b.reservedSeatType = :seatType " +
                         "AND b.status = true " +
-                        "AND (:startTime < b.endTime AND :endTime > b.startTime)")
-        long countOverlappingBookings(
+                        "AND (CAST(:startTime AS time) < b.endTime AND CAST(:endTime AS time) > b.startTime)")
+        Integer countOverlappingBookings(
                         @Param("storeId") Integer storeId,
                         @Param("date") LocalDate date,
                         @Param("seatType") Integer seatType,

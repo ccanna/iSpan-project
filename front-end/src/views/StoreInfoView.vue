@@ -91,7 +91,7 @@ onMounted(() => {
               </div>
 
               <div class="mt-4 pt-3">
-                <RouterLink :to="{ name: 'Reservation', query: { storeId: route.params.id } }" v-slot="{ navigate }">
+                <RouterLink :to="{ name: 'Reservation', params: { id: route.params.id } }" v-slot="{ navigate }">
                   <BaseButton color="gdg" @click="navigate" class="px-5">我要訂位</BaseButton>
                 </RouterLink>
               </div>

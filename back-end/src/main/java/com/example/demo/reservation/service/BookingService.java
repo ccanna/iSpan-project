@@ -13,6 +13,7 @@ import com.example.demo.reservation.dto.BookingResponseDto;
 import com.example.demo.reservation.dto.SlotAvailDto;
 import com.example.demo.reservation.entity.Booking;
 import com.example.demo.reservation.repository.BookingRepository;
+import com.example.demo.store.dto.ReservationSettingsDto;
 import com.example.demo.store.entity.OpenHour;
 import com.example.demo.store.entity.Seat;
 import com.example.demo.store.entity.SeatId;
@@ -35,6 +36,42 @@ public class BookingService {
     private final UserRepository userRepository;
     private final OpenHourRepository openHourRepository;
 
+    // 取得店家訂位設定
+    // 與StoreOperationService.java中的getStoreBookingConfig()方法幾乎相同，但不限定商家本人登入
+    // 重用 ReservationSettingsDto
+    public ReservationSettingsDto getStoreReservationConfig(Integer storeId) {
+        // 1. 抓取商店基礎資訊
+        StoresInfo store = storeInfoRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("找不到該店家"));
+        // 2. 準備 DTO
+        ReservationSettingsDto dto = new ReservationSettingsDto();
+        dto.setName(store.getStoreName());
+        dto.setTimeSlot(store.getTimeSlot());
+        dto.setTimeLimit(store.getTimeLimit());
+        // 3. 獲取營業時間
+        List<ReservationSettingsDto.OpenHourDto> ohDtos = openHourRepository.findByStore_StoreId(storeId).stream()
+                .map(oh -> {
+                    ReservationSettingsDto.OpenHourDto ohDto = new ReservationSettingsDto.OpenHourDto();
+                    ohDto.setDayOfWeek(oh.getDayOfWeek());
+                    ohDto.setOpenTime(oh.getOpenTime().toString());
+                    ohDto.setCloseTime(oh.getCloseTime().toString());
+                    ohDto.setIsClosed(false);
+                    return ohDto;
+                }).toList();
+        dto.setOpenHours(ohDtos);
+        // 4. 獲取座位設定
+        List<ReservationSettingsDto.SeatSettingsDto> sDtos = seatRepository.findByIdStoreId(storeId).stream()
+                .map(s -> {
+                    ReservationSettingsDto.SeatSettingsDto sDto = new ReservationSettingsDto.SeatSettingsDto();
+                    sDto.setSeatType(s.getId().getSeatType());
+                    sDto.setTotalCount(s.getTotalCount());
+                    return sDto;
+                }).toList();
+        dto.setSeatSettings(sDtos);
+        return dto;
+    }
+
+    // 取得某一天某桌型的可訂位時段
     public List<SlotAvailDto> getAvailableSlots(Integer storeId, LocalDate date, Integer seatType) {
         // 獲取店家資訊
         StoresInfo store = storeInfoRepository.findById(storeId)
@@ -46,7 +83,7 @@ public class BookingService {
 
         // 取得當天是星期幾 (Java 的列舉 1-7)
         int dayOfWeek = date.getDayOfWeek().getValue();
-        // 如果你的資料庫存 0(日)-6(六)，要做轉換
+        // 資料庫存 0(日)-6(六)，要做轉換
         int dbDayValue = (dayOfWeek == 7) ? 0 : dayOfWeek;
 
         // 獲取OpenHour
@@ -59,7 +96,7 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("該店未提供此桌型"));
         Integer totalTables = seatConfig.getTotalCount();
 
-        // -----------------開始寫可訂位時段迴圈
+        // -----------------開始寫可訂位時段迴圈------------------
         List<SlotAvailDto> slots = new ArrayList<>();
         LocalTime currentTime = openHour.getOpenTime();
         LocalTime closeTime = openHour.getCloseTime(); // 最後可訂位時間
@@ -87,6 +124,7 @@ public class BookingService {
         return slots;
     }
 
+    // 前端輸入建立訂位
     @Transactional
     public BookingResponseDto createBooking(BookingRequestDto dto) {
         // 1. 驗證使用者與店家是否存在
