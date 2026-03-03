@@ -18,4 +18,8 @@ public class AdminRegistrationRequest {
 
     @NotBlank(message = "Position is required")
     private String position;
+
+    @NotBlank(message = "Email is required")
+    @jakarta.validation.constraints.Email(message = "Invalid email format")
+    private String email;
 }

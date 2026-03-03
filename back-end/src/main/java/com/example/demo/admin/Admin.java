@@ -32,6 +32,9 @@ public class Admin {
     @Column(nullable = false, length = 50)
     private String position; // 角色（客服、電商、...）
 
+    @Column(unique = true, nullable = false, length = 100)
+    private String email;
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean enabled = true; // 帳號是否鎖定

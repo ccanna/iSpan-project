@@ -64,8 +64,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 允許訪問認證相關端點
                         .requestMatchers("/api/auth/**").permitAll()
-                        // 放行管理員登入
+                        // 放行管理員登入與相關基礎功能
                         .requestMatchers("/api/admins/login").permitAll()
+                        .requestMatchers("/api/admins/forgot-password").permitAll()
+                        .requestMatchers("/api/admins/reset-password").permitAll()
                         // TODO: 測試完成後，移除此行恢復強制登入檢查
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/admins").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/admins").permitAll() // 暫時放行新增管理員
@@ -75,7 +77,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/store-registrations/**").permitAll()
                         // OAuth2 登入端點
                         .requestMatchers("/api/products/**").permitAll()
-                        //放行電商商品相關API
+                        // 放行電商商品相關API
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         // 地圖搜尋端點：允許匿名存取（搜尋不需要登入）
                         .requestMatchers("/api/map/**").permitAll()

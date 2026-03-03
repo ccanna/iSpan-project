@@ -115,7 +115,7 @@ const handleLogin = async () => {
           </BaseButton>
 
           <div class="text-center mt-2">
-            <button type="button" class="btn btn-link text-admin-primary small text-decoration-none fw-medium">
+            <button type="button" @click="router.push('/admin/forgot-password')" class="btn btn-link text-admin-primary small text-decoration-none fw-medium">
               忘記密碼？
             </button>
           </div>

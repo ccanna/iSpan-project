@@ -86,6 +86,7 @@ public class AdminService {
         Admin admin = Admin.builder()
                 .account(request.getAccount())
                 .name(request.getName())
+                .email(request.getEmail())
                 .position(request.getPosition())
                 .password(passwordEncoder.encode(request.getAccount())) // 密碼 = 帳號（加密）
                 .enabled(true) // 預設啟用
@@ -117,6 +118,7 @@ public class AdminService {
                 .id(admin.getId())
                 .account(admin.getAccount())
                 .name(admin.getName())
+                .email(admin.getEmail())
                 .position(admin.getPosition())
                 .enabled(admin.getEnabled())
                 .build();

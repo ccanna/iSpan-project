@@ -52,9 +52,10 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>帳號</th>
               <th>姓名</th>
+              <th>帳號</th>
               <th>職位</th>
+              <th>信箱</th>
               <th>停權狀態</th>
               <th>編輯</th>
             </tr>
@@ -71,6 +72,7 @@
                   {{ admin.position }}
                 </span>
               </td>
+              <td>{{ admin.email }}</td>
               <td>
                 <span :class="['status-badge', admin.isBanned ? 'status-banned' : 'status-active']">
                   {{ admin.isBanned ? '已停權' : '正常' }}
@@ -118,6 +120,7 @@ const fetchAdmins = async () => {
                 id: admin.id,
                 username: admin.account,
                 fullName: admin.name,
+                email: admin.email,
                 position: admin.position,
                 isBanned: !admin.enabled
             }));
@@ -191,6 +194,10 @@ const openAddModal = async () => {
           <input id="swal-input-name" class="form-control" placeholder="請輸入姓名">
         </div>
         <div class="mb-3">
+          <label class="form-label fw-bold">信箱</label>
+          <input id="swal-input-email" type="email" class="form-control" placeholder="請輸入信箱">
+        </div>
+        <div class="mb-3">
           <label class="form-label fw-bold">職位</label>
           <input id="swal-input-position" class="form-control" placeholder="請輸入職位">
         </div>
@@ -204,14 +211,16 @@ const openAddModal = async () => {
     preConfirm: () => {
       const account = document.getElementById('swal-input-account').value;
       const name = document.getElementById('swal-input-name').value;
+      const email = document.getElementById('swal-input-email').value;
       const position = document.getElementById('swal-input-position').value;
-      if (!account || !name || !position) {
+      if (!account || !name || !email || !position) {
         Swal.showValidationMessage('請填寫所有欄位');
         return false;
       }
       return { 
         account, // 帳號
         name,    // 姓名
+        email,   // 信箱
         position // 職位
       };
     }

@@ -15,5 +15,6 @@ public class AdminResponse {
     private String account;
     private String name;
     private String position;
+    private String email;
     private Boolean enabled;
 }

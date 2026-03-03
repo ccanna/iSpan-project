@@ -261,6 +261,18 @@ const routes = [
     meta: { layout: 'blank' }
   },
   {
+    path: '/admin/forgot-password',
+    name: 'AdminForgetPassword',
+    component: () => import('@/views/AdminForgetPasswordView.vue'),
+    meta: { layout: 'blank' }
+  },
+  {
+    path: '/admin/reset-password',
+    name: 'AdminResetPassword',
+    component: () => import('@/views/AdminResetPasswordView.vue'),
+    meta: { layout: 'blank' }
+  },
+  {
     path: '/getusertest',
     name: 'GetUserTest',
     component: () => import('@/views/GetUserTestView.vue')
