@@ -80,7 +80,7 @@
               </td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-icon text-primary" title="編輯">
+                  <button class="btn-icon text-primary" title="編輯" @click="openEditModal(admin)">
                     <i class="bi bi-pencil-square"></i>
                   </button>
                 </div>
@@ -116,6 +116,13 @@ const positionMap = {
   'HUMAN_RESOURCE': '人事',
   'CUSTOMER_SERVICE': '客服',
   'SHOP_MANAGER': '電商'
+};
+
+const roleToEnumMap = {
+  '總管理員': 'SUPER_ADMIN',
+  '人事': 'HUMAN_RESOURCE',
+  '客服': 'CUSTOMER_SERVICE',
+  '電商': 'SHOP_MANAGER'
 };
 
 // Fetch admins on mount
@@ -275,6 +282,102 @@ const openAddModal = async () => {
       
       Swal.fire({
         title: '新增失敗',
+        html: errorMessage,
+        icon: 'error',
+        confirmButtonColor: '#1e3c72'
+      });
+    }
+  }
+};
+
+// 編輯管理員彈窗
+const openEditModal = async (admin) => {
+  // 將中文職稱轉回 Enum Value 以便預設選取
+  const currentEnumPos = roleToEnumMap[admin.position] || admin.position;
+  // 將 true/false 狀態轉換為字串 'true'/'false' 供 select 使用
+  const currentEnabled = admin.isBanned ? 'false' : 'true';
+
+  const { value: formValues } = await Swal.fire({
+    title: '編輯管理員',
+    html: `
+      <div class="text-start">
+        <div class="mb-3">
+          <label class="form-label fw-bold">帳號</label>
+          <input id="swal-edit-account" class="form-control" value="${admin.username}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">姓名</label>
+          <input id="swal-edit-name" class="form-control" value="${admin.fullName}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">信箱</label>
+          <input id="swal-edit-email" type="email" class="form-control" value="${admin.email}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">職位</label>
+          <select id="swal-edit-position" class="form-select">
+            <option value="SUPER_ADMIN" ${currentEnumPos === 'SUPER_ADMIN' ? 'selected' : ''}>總管理員</option>
+            <option value="HUMAN_RESOURCE" ${currentEnumPos === 'HUMAN_RESOURCE' ? 'selected' : ''}>人事</option>
+            <option value="CUSTOMER_SERVICE" ${currentEnumPos === 'CUSTOMER_SERVICE' ? 'selected' : ''}>客服</option>
+            <option value="SHOP_MANAGER" ${currentEnumPos === 'SHOP_MANAGER' ? 'selected' : ''}>電商</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">帳號狀態</label>
+          <select id="swal-edit-enabled" class="form-select">
+            <option value="true" ${currentEnabled === 'true' ? 'selected' : ''}>正常</option>
+            <option value="false" ${currentEnabled === 'false' ? 'selected' : ''}>已停權</option>
+          </select>
+        </div>
+      </div>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: '儲存變更',
+    cancelButtonText: '取消',
+    confirmButtonColor: '#1e3c72',
+    preConfirm: () => {
+      const account = document.getElementById('swal-edit-account').value;
+      const name = document.getElementById('swal-edit-name').value;
+      const email = document.getElementById('swal-edit-email').value;
+      const position = document.getElementById('swal-edit-position').value;
+      const enabled = document.getElementById('swal-edit-enabled').value === 'true';
+
+      if (!account || !name || !email || !position) {
+        Swal.showValidationMessage('請填寫所有欄位');
+        return false;
+      }
+
+      return { account, name, email, position, enabled };
+    }
+  });
+
+  if (formValues) {
+    try {
+      const response = await adminAPI.update(admin.id, formValues);
+      await fetchAdmins();
+
+      Swal.fire({
+        title: '更新成功',
+        text: `已成功更新 ${formValues.name} 的資料`,
+        icon: 'success',
+        confirmButtonColor: '#1e3c72',
+        timer: 2000
+      });
+    } catch (error) {
+      console.error('更新管理員時發生錯誤:', error);
+      
+      let errorMessage = error.response?.data?.message || '無法連線至伺服器或儲存資料失敗';
+      
+      if (error.response?.data?.data && typeof error.response.data.data === 'object') {
+        const validationErrors = Object.values(error.response.data.data);
+        if (validationErrors.length > 0) {
+          errorMessage = validationErrors.join('<br>');
+        }
+      }
+      
+      Swal.fire({
+        title: '更新失敗',
         html: errorMessage,
         icon: 'error',
         confirmButtonColor: '#1e3c72'

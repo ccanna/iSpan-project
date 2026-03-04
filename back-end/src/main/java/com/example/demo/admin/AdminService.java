@@ -107,6 +107,45 @@ public class AdminService {
         return mapToAdminResponse(admin);
     }
 
+    public AdminResponse updateAdmin(Integer id, com.example.demo.admin.dto.AdminUpdateRequest request) {
+        Admin admin = adminRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Admin not found with id: " + id));
+
+        // 檢查帳號是否與其他人衝突
+        adminRepository.findByAccount(request.getAccount())
+                .ifPresent(existingAdmin -> {
+                    if (!existingAdmin.getId().equals(id)) {
+                        throw new RuntimeException("Account already exists: " + request.getAccount());
+                    }
+                });
+
+        // 檢查信箱是否與其他人衝突
+        adminRepository.findByEmail(request.getEmail())
+                .ifPresent(existingAdmin -> {
+                    if (!existingAdmin.getId().equals(id)) {
+                        throw new RuntimeException("Email already exists: " + request.getEmail());
+                    }
+                });
+
+        admin.setAccount(request.getAccount());
+        admin.setName(request.getName());
+        admin.setPosition(request.getPosition());
+        admin.setEmail(request.getEmail());
+        admin.setEnabled(request.getEnabled());
+
+        admin = adminRepository.save(admin);
+
+        System.out.println("========== ADMIN UPDATE SUCCESS ==========");
+        System.out.println("ID: " + admin.getId());
+        System.out.println("Account: " + admin.getAccount());
+        System.out.println("Name: " + admin.getName());
+        System.out.println("Position: " + admin.getPosition());
+        System.out.println("Enabled: " + admin.getEnabled());
+        System.out.println("=========================================");
+
+        return mapToAdminResponse(admin);
+    }
+
     public java.util.List<AdminResponse> getAllAdmins() {
         return adminRepository.findAll().stream()
                 .map(this::mapToAdminResponse)

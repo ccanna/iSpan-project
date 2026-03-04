@@ -43,6 +43,18 @@ public class AdminController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateAdmin(@PathVariable Integer id,
+            @Valid @RequestBody com.example.demo.admin.dto.AdminUpdateRequest request) {
+        try {
+            AdminResponse response = adminService.updateAdmin(id, request);
+            return ResponseEntity.ok(ApiResponse.success("Admin updated successfully", response));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
     @GetMapping
     public ResponseEntity<?> getAllAdmins() {
         return ResponseEntity.ok(ApiResponse.success("Admins retrieved successfully", adminService.getAllAdmins()));
