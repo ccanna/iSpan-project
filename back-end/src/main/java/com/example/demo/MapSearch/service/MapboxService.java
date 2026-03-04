@@ -17,9 +17,7 @@ import java.util.Map;
 @Service
 public class MapboxService {
     // MapBox Key
-    private final String ACCESS_TOKEN = ${mapBox.access-token};
-
-    @Value("${mapbox.access-token}")
+    @Value("${mapBox.access-token}")
     private String accessToken;
 
     /**
