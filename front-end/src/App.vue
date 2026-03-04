@@ -7,35 +7,31 @@ import Navbar from '@/layouts/navbar.vue';
 import Footer from '@/layouts/footer.vue';
 import { onMounted } from 'vue';
 import { useProductsDepot } from '@/stores/productsDepot';
-import { useCartStore } from '@/stores/cart'
-import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart';
+import { useAuthStore } from '@/stores/auth';
+import { useAdminAuthStore } from '@/stores/adminAuth';
 
 
 const depot = useProductsDepot();
 
 onMounted(async () => {
     const authStore = useAuthStore()
+    const adminAuthStore = useAdminAuthStore();
     const cartStore = useCartStore()
     
     if (authStore.isLoggedIn) {
         await cartStore.fetchCart()
+        authStore.syncUserProfile();
+    }
+    if (adminAuthStore.isLoggedIn) {
+        adminAuthStore.syncAdminProfile();
     }
 })
 // const route = useRoute();
-
-// const layout = computed(() => {
-//   if (route.meta.layout === 'blank') return BlankLayout;
-//   return DefaultLayout;
-// });
 </script>
 
 <template>
-  <Navbar />
-  <!-- <component :is="layout">
-    <RouterView />
-  </component> -->
   <RouterView />
-  <Footer />
 </template>
 
 <style scoped></style>
