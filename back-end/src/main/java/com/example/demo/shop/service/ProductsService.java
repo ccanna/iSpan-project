@@ -32,6 +32,8 @@ public class ProductsService {
         
         //儲存取得的商品
         Products saveProduct = productsRepository.save(product);
+        product.setProductCode(String.format("PRD-%04d", product.getProductId()));
+        productsRepository.save(product);
 
         Stock stock = new Stock();
         stock.setAvailableQuantity(dto.getStock());

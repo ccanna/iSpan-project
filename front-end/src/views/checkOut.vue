@@ -77,6 +77,8 @@ const handleCheckout = async () => {
         return;
     }
 
+    
+
     const orderNumber = 'ORD' + Date.now();
 
 
@@ -101,50 +103,39 @@ const handleCheckout = async () => {
 
 
     // 這裡模擬送出訂單
-    Swal.fire({
+    const result = await Swal.fire({
         title: '確認送出訂單？',
         text: `總金額為 NT$ ${cartStore.totalPrice}`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: '確定下單',
         cancelButtonText: '再檢查一下'
-    }).then((result) => {
-        if (result.isConfirmed ) {
-            // 💡 之後串綠界時，這裡會呼叫後端 API 取得綠界的導向表單
-            
-            orderDepot.addOrder({
-                customer:{...orderForm.value},
-                totalPrice: cartStore.totalPrice,
-                status: currentStatus,
-                items: cartStore.items.map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    price: item.price,
-                    quantity: item.quantity
-                })),
-
-            })
-
-            console.log('目前的訂單總數：', orderDepot.orders.length); // 這裡應該會顯示 1 以上
-
-            cartStore.clearCart();
-
-            Swal.fire({
-                icon: 'success',
-                title: '成功',
-                text: `訂單已建立！狀態為：${currentStatus}`,
-                footer: `<p style="font-weight: bold; font-size: 16px; color: 198754;">訂單編號為: ${orderNumber}</p>`
-            })
-
-            router.push('/shopStore')
-            // 測試用：清空購物車並導回首頁
-            // cartStore.items = []
-            // cartStore.saveToStorage()
-            // router.push('/shopStore')
-
-        }
-        
     })
+
+    if (result.isConfirmed) {
+        orderDepot.addOrder({
+            customer: {...orderForm.value},
+            totalPrice: cartStore.totalPrice,
+            status: currentStatus,
+            items: cartStore.items.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity
+            })),
+        })
+
+        await cartStore.clearCart()  // ← 這樣才能正確 await
+
+        await Swal.fire({
+            icon: 'success',
+            title: '成功',
+            text: `訂單已建立！狀態為：${currentStatus}`,
+            footer: `<p style="font-weight: bold; font-size: 16px;">訂單編號為: ${orderNumber}</p>`
+        })
+
+        router.push('/shopStore')
+    }
 }
 
 //增加檢核e-mail

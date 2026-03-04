@@ -86,74 +86,17 @@ export const useCartStore = defineStore('cart', {
             }
         },
 
-        clearCart() {
-            this.items = [];
-        }
+        async clearCart() {
+            try {
+                await cartAPI.clear()
+                this.items = []
+            } catch (error) {
+                console.error("清空購物車失敗", error)
 
+            }
+
+        }
     }
+
 })
 
-
-
-
-
-// import { defineStore } from 'pinia';
-// import axios from 'axios'; // 💡 確保有這行
-
-// export const useCartStore = defineStore('cart', {
-//     state: () => ({
-//         items: []
-//     }),
-
-//     getters: {
-//         totalPrice: (state) => {
-//             return state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
-//         }
-//     },
-
-//     actions: {
-//         // 取得購物車清單
-//         async fetchCart() {
-//             try {
-//                 const response = await axios.get('http://localhost:8080/api/cart/all');
-//                 // 💡 這裡要把後端的 DTO 欄位轉為前端習慣的欄位
-//                 this.items = response.data.map(item => ({
-//                     id: item.id,               // 購物車明細 ID
-//                     productId: item.productId, // 商品 ID
-//                     name: item.productName,    // 💡 對應後端 CartDTO 的 productName
-//                     price: item.price,
-//                     quantity: item.quantity,
-//                     image: item.image          // 💡 對應後端 CartDTO 的 image
-//                 }));
-//             } catch (error) {
-//                 console.error("抓取購物車失敗", error);
-//             }
-//         },
-
-//         // 加入購物車 (一次修好 400 錯誤)
-//         async addToCart(productId, quantity) {
-//             try {
-//                 const payload = {
-//                     productId: Number(productId),
-//                     quantity: Number(quantity)
-//                 };
-
-//                 const response = await axios.post('http://localhost:8080/api/cart/add', payload, {
-//                     withCredentials: true // 💡 確保瀏覽器會自動帶上 Session Cookie
-//                 });
-
-
-
-//                 await this.fetchCart();
-//                 return response.data;
-//             } catch (error) {
-//                 // ...
-//             }
-//         },
-
-//         // 清空購物車
-//         clearCart() {
-//             this.items = [];
-//         }
-//     }
-// });
