@@ -36,6 +36,7 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final com.example.demo.common.security.CustomOAuth2UserService customOAuth2UserService;
     private final com.example.demo.common.security.OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final com.example.demo.common.security.OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -104,7 +105,8 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService))
-                        .successHandler(oAuth2LoginSuccessHandler))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
