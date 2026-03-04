@@ -32,6 +32,41 @@ public class StoreOperationService extends StoreBaseService {
         this.seatRepository = seatRepository;
     }
 
+    // 取得目前店家的預約設定
+    public ReservationSettingsDto getReservationSettings() {
+        // 1. 取得目前登入的店家資訊
+        StoresInfo store = getMyStore();
+        Integer storeId = store.getStoreId();
+
+        ReservationSettingsDto dto = new ReservationSettingsDto();
+        dto.setTimeSlot(store.getTimeSlot());
+        dto.setTimeLimit(store.getTimeLimit());
+
+        // 2. 獲取營業時間
+        List<ReservationSettingsDto.OpenHourDto> ohDtos = openHourRepository.findByStore_StoreId(storeId).stream()
+                .map(oh -> {
+                    ReservationSettingsDto.OpenHourDto ohDto = new ReservationSettingsDto.OpenHourDto();
+                    ohDto.setDayOfWeek(oh.getDayOfWeek());
+                    ohDto.setOpenTime(oh.getOpenTime().toString());
+                    ohDto.setCloseTime(oh.getCloseTime().toString());
+                    ohDto.setIsClosed(false);
+                    return ohDto;
+                }).toList();
+        dto.setOpenHours(ohDtos);
+
+        // 3. 獲取座位設定
+        List<ReservationSettingsDto.SeatSettingsDto> sDtos = seatRepository.findByIdStoreId(storeId).stream()
+                .map(s -> {
+                    ReservationSettingsDto.SeatSettingsDto sDto = new ReservationSettingsDto.SeatSettingsDto();
+                    sDto.setSeatType(s.getId().getSeatType());
+                    sDto.setTotalCount(s.getTotalCount());
+                    return sDto;
+                }).toList();
+        dto.setSeatSettings(sDtos);
+
+        return dto;
+    }
+
     // 更新店家座位、營業時間與時段設定
     @Transactional
     public void updateReservationSettings(ReservationSettingsDto dto) {
@@ -47,14 +82,23 @@ public class StoreOperationService extends StoreBaseService {
 
         // 3. 更新營業時間 (先刪除，後新增)
         openHourRepository.deleteByStore_StoreId(storeId);
+        openHourRepository.flush(); // 強制執行刪除
+
         if (dto.getOpenHours() != null) {
             List<OpenHour> newOpenHours = dto.getOpenHours().stream().map(hDto -> {
+                LocalTime open = LocalTime.parse(hDto.getOpenTime());
+                LocalTime close = LocalTime.parse(hDto.getCloseTime());
+
+                // 阻擋跨日營業時間
+                if (!close.isAfter(open)) {
+                    throw new IllegalArgumentException("營業時間設定錯誤：結束時間必須晚於開始時間（星期 " + hDto.getDayOfWeek() + "）");
+                }
+
                 OpenHour oh = new OpenHour();
                 oh.setStore(store);
                 oh.setDayOfWeek(hDto.getDayOfWeek());
-                // 假設前端傳來的是 String "11:00"，需轉換為 LocalTime
-                oh.setOpenTime(LocalTime.parse(hDto.getOpenTime()));
-                oh.setCloseTime(LocalTime.parse(hDto.getCloseTime()));
+                oh.setOpenTime(open);
+                oh.setCloseTime(close);
                 return oh;
             }).toList();
             openHourRepository.saveAll(newOpenHours);
@@ -62,6 +106,8 @@ public class StoreOperationService extends StoreBaseService {
 
         // 4. 更新座位設定 (先刪除，後新增)
         seatRepository.deleteById_StoreId(storeId);
+        seatRepository.flush(); // 強制執行刪除
+
         if (dto.getSeatSettings() != null) {
             List<Seat> newSeats = dto.getSeatSettings().stream().map(sDto -> {
                 Seat seat = new Seat();
@@ -74,5 +120,6 @@ public class StoreOperationService extends StoreBaseService {
             }).toList();
             seatRepository.saveAll(newSeats);
         }
+
     }
 }

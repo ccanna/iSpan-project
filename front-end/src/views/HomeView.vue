@@ -130,16 +130,7 @@ import bannerImage from '@/pictures/bannerBrown.jpg';
         <ul class="mt-5 pt-4 border-top">
           <div>跳轉測試用：</div>
           <li>
-            <RouterLink to="/" class="text-gdg">首頁</RouterLink>
-          </li>
-          <li>
-            <RouterLink to="/login" class="text-gdg">登入頁面</RouterLink>
-          </li>
-          <li>
             <RouterLink to="/storeInfo" class="text-gdg">店家資訊頁面(消費者)</RouterLink>
-          </li>
-          <li>
-            <RouterLink to="/user/bookings" class="text-gdg">訂位查詢頁面(消費者)</RouterLink>
           </li>
         </ul>
       </div>

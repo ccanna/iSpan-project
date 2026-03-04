@@ -2,6 +2,7 @@ package com.example.demo.store.entity;
 
 import lombok.Data;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
 import java.time.LocalTime;
 
 @Data
@@ -25,4 +26,12 @@ public class OpenHour {
 
     @Column(nullable = false)
     private LocalTime closeTime;
+
+    @AssertTrue(message = "結束時間必須晚於開始時間（目前不支援跨日營業）")
+    public boolean isValidTimeRange() {
+        if (openTime == null || closeTime == null) {
+            return true; // 交給 @Column(nullable = false) 或 @NotNull 處理
+        }
+        return closeTime.isAfter(openTime);
+    }
 }

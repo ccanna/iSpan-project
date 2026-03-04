@@ -5,8 +5,10 @@ import BaseButton from '@/components/common/BaseButton.vue';
 import Swal from 'sweetalert2';
 import storeAPI from '@/api/store';
 
+// 編輯狀態(預設為 false，表示非編輯模式)
 const isEditing = ref(false);
 
+// 店家資訊相關
 const storeName = ref('');
 const storeDescription = ref('');
 const storePhone = ref('');
@@ -37,6 +39,7 @@ const getImageUrl = (imgName) => {
   return `/pictures/StoreProfile/${imgName}`;
 };
 
+// 獲取店家資訊(將後端資料庫值存入對應的 ref 變數)
 const fetchStoreInfo = async () => {
   try {
     const response = await storeAPI.getMyStoreInfo();
@@ -62,10 +65,12 @@ const fetchStoreInfo = async () => {
   }
 };
 
+// 頁面載入時獲取店家資訊
 onMounted(() => {
   fetchStoreInfo();
 });
 
+// 處理標籤新增與刪除
 const addLabel = (newLabel) => {
   // 檢查是否已存在 (根據 ID)
   if (!myLabels.value.some(tag => tag.categoryId === newLabel.categoryId)) {
@@ -77,6 +82,7 @@ const removeLabel = (index) => {
   myLabels.value.splice(index, 1);
 };
 
+// 處理編輯相關
 const startEditing = () => {
   // 備份原始資料
   originalData.value = {
@@ -236,13 +242,7 @@ const handleSave = async () => {
     </div>
 
     <div class="store-name-section mb-4">
-      <div v-if="!isEditing">
-        <h2 class="h3 fw-bold text-gdg">{{ storeName }}</h2>
-      </div>
-      <div v-else>
-        <label class="form-label text-gdg fw-bold">店家名稱：</label>
-        <input type="text" v-model="storeName" class="form-control border-gdg" />
-      </div>
+      <h2 class="h3 fw-bold text-gdg">{{ storeName }}</h2>
     </div>
 
     <div class="info-section mb-4">
@@ -257,25 +257,13 @@ const handleSave = async () => {
     </div>
 
     <div class="info-section mb-4">
-      <div v-if="!isEditing">
-        <label class="form-label text-gdg fw-bold">連絡電話：</label>
-        <p class="p-3 border bg-light">{{ storePhone }}</p>
-      </div>
-      <div v-else>
-        <label class="form-label text-gdg fw-bold">編輯電話：</label>
-        <input type="text" v-model="storePhone" class="form-control border-gdg" />
-      </div>
+      <label class="form-label text-gdg fw-bold">連絡電話：</label>
+      <p class="p-3 border bg-light">{{ storePhone }}</p>
     </div>
 
     <div class="info-section mb-4">
-      <div v-if="!isEditing">
-        <label class="form-label text-gdg fw-bold">店家地址：</label>
-        <p class="p-3 border bg-light">{{ storeAddress }}</p>
-      </div>
-      <div v-else>
-        <label class="form-label text-gdg fw-bold">編輯地址：</label>
-        <input type="text" v-model="storeAddress" class="form-control border-gdg" />
-      </div>
+      <label class="form-label text-gdg fw-bold">店家地址：</label>
+      <p class="p-3 border bg-light">{{ storeAddress }}</p>
     </div>
 
     <div class="label-section mb-4">

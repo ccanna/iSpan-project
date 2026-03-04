@@ -36,6 +36,7 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final com.example.demo.common.security.CustomOAuth2UserService customOAuth2UserService;
     private final com.example.demo.common.security.OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final com.example.demo.common.security.OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -64,8 +65,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 允許訪問認證相關端點
                         .requestMatchers("/api/auth/**").permitAll()
-                        // 放行管理員登入
+                        // 放行管理員登入與相關基礎功能
                         .requestMatchers("/api/admins/login").permitAll()
+                        .requestMatchers("/api/admins/forgot-password").permitAll()
+                        .requestMatchers("/api/admins/reset-password").permitAll()
                         // TODO: 測試完成後，移除此行恢復強制登入檢查
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/admins").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/admins").permitAll() // 暫時放行新增管理員
@@ -87,6 +90,10 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feedbackList").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feedbackList/status-list")
                         .permitAll()
+                        // 商家資訊端點：允許公開查看特定商家資訊
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/owner/store/{id}").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings/config/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings/available-slots").permitAll()
                         // 管理員權限端點
                         // .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
                         // .requestMatchers(HttpMethod.PUT,
@@ -110,7 +117,8 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService))
-                        .successHandler(oAuth2LoginSuccessHandler))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

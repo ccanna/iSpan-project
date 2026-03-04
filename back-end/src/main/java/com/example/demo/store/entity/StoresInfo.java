@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.example.demo.user.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Data
 @Entity
@@ -49,6 +50,7 @@ public class StoresInfo {
     private Integer timeLimit = 90;
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("store")
     private List<OpenHour> openHour;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -56,5 +58,6 @@ public class StoresInfo {
             joinColumns = @JoinColumn(name = "store_id"), // 對應本表 (StoresInfo) 的外鍵
             inverseJoinColumns = @JoinColumn(name = "category_id") // 對應目標表 (Category) 的外鍵
     )
+    @JsonIgnoreProperties("stores")
     private List<Category> categories;
 }

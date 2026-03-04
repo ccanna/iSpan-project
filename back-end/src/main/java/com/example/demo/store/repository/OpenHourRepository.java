@@ -1,6 +1,7 @@
 package com.example.demo.store.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,4 +15,7 @@ public interface OpenHourRepository extends JpaRepository<OpenHour, Integer> {
 
     // 2. 根據 storeId 刪除所有營業時間（用於更新設定時，「先刪後增」的覆蓋邏輯）
     void deleteByStore_StoreId(Integer storeId);
+
+    // 3. 根據 storeId 和 dayOfWeek 找出該店某天的營業時間
+    Optional<OpenHour> findByStore_StoreIdAndDayOfWeek(Integer storeId, Integer dayOfWeek);
 }
