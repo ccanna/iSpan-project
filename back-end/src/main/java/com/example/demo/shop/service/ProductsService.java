@@ -33,6 +33,10 @@ public class ProductsService {
         //儲存取得的商品
         Products saveProduct = productsRepository.save(product);
 
+        //編號生成
+        saveProduct.setProductCode(String.format("PRD-%04d", saveProduct.getProductId()));
+        productsRepository.save(saveProduct);
+
         Stock stock = new Stock();
         stock.setAvailableQuantity(dto.getStock());
         stock.setProduct(saveProduct); //因為在stock使用mapsID關聯productsID，所以這邊jpa會自動把saveproducts ID自動填入stock的productID

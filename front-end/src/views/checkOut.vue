@@ -5,6 +5,7 @@ import { ref, computed, onMounted  } from 'vue'
 import Swal from 'sweetalert2'
 import { useOrderDepot } from '@/stores/orderDepot.js'
 import TwCitySelector from 'tw-city-selector'
+import api from '@/api/config'
 
 const cartStore = useCartStore()
 const router = useRouter()
@@ -72,7 +73,7 @@ const handleCheckout = async () => {
         return
     }
 
-    if (orderForm.email && !isValidEmail(orderForm.email)) {
+    if (orderForm.value.email && !isValidEmail(orderForm.value.email)) {
         Swal.fire('錯誤', 'Email 格式有誤', 'error');
         return;
     }
@@ -101,17 +102,30 @@ const handleCheckout = async () => {
 
 
     // 這裡模擬送出訂單
-    Swal.fire({
+    const result = await Swal.fire({
         title: '確認送出訂單？',
         text: `總金額為 NT$ ${cartStore.totalPrice}`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: '確定下單',
         cancelButtonText: '再檢查一下'
-    }).then((result) => {
-        if (result.isConfirmed ) {
-            // 💡 之後串綠界時，這裡會呼叫後端 API 取得綠界的導向表單
-            
+    })
+    
+    
+    if (result.isConfirmed) {
+
+        try{
+            const response = await api.post('/orders/checkout', {
+                name: orderForm.value.name,
+                phone: orderForm.value.phone,
+                city: orderForm.value.city,
+                district: orderForm.value.district,
+                street: orderForm.value.street,
+                deliveryMethod: orderForm.value.deliveryMethod,
+                paymentMethod: orderForm.value.paymentMethod,
+                note: orderForm.value.note
+            })
+
             orderDepot.addOrder({
                 customer:{...orderForm.value},
                 totalPrice: cartStore.totalPrice,
@@ -127,9 +141,9 @@ const handleCheckout = async () => {
 
             console.log('目前的訂單總數：', orderDepot.orders.length); // 這裡應該會顯示 1 以上
 
-            cartStore.clearCart();
+            await cartStore.fetchCart();
 
-            Swal.fire({
+            await Swal.fire({
                 icon: 'success',
                 title: '成功',
                 text: `訂單已建立！狀態為：${currentStatus}`,
@@ -137,14 +151,14 @@ const handleCheckout = async () => {
             })
 
             router.push('/shopStore')
-            // 測試用：清空購物車並導回首頁
-            // cartStore.items = []
-            // cartStore.saveToStorage()
-            // router.push('/shopStore')
-
+        } catch (error) {
+            Swal.fire('錯誤',error.response?.data?.error || '結帳失敗', 'error')
         }
-        
-    })
+
+
+    }
+    
+    
 }
 
 //增加檢核e-mail

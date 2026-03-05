@@ -15,4 +15,7 @@ public  interface CartDetailsRepository extends JpaRepository<CartDetails, Integ
     //檢查使用者是否把商品加入購物車(加數量)
     Optional<CartDetails>findByUser_IdAndProduct_ProductId(Long UserId, Integer productId );
 
+    //刪除使用者所有購物車項目
+    void deleteByUser_Id(Long userId);
+
 }

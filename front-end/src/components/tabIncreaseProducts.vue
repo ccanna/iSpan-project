@@ -30,7 +30,7 @@ const handleAddProduct =async () => {
             productName:form.value.productName,
             price: form.value.price,
             stock: form.value.stock,
-            description: form.value.description,
+            productDescription: form.value.description,
             image: form.value.image,
         });
 

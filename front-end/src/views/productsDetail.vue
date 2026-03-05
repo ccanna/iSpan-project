@@ -75,14 +75,12 @@ const handleAddToCart = async () => {
             <nav class="breadcrumb">首頁 / 質感選物 / {{ products.productName }}</nav>
             
             <h1 class="products-title">{{ products.productName }}</h1>
+            <p class="text-muted" style="font-size: 0.85rem;">商品編號：{{ products.productCode }}</p>
             <p class="products-price">NT$ {{ products.price }}</p>
             
             <hr class="divider" />
 
-            <div class="products-description">
-            <h3>商品描述</h3>
-            <p>{{ products.description }}</p>
-            </div>
+            
 
             <div class="purchase-section">
             <div class="stock-status">

@@ -23,6 +23,7 @@ export const useProductsDepot = defineStore('productDepot', {
                     image: p.image,
                     stock: p.stock ? p.stock.availableQuantity : 0,
                     added: p.added,
+                    productCode: p.productCode,
                     lastUpdate: p.stock ? p.stock.updateAt : null
                 }));
             } catch (error) {
