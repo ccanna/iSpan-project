@@ -8,10 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.user.UserRepository;
 import com.example.demo.store.dto.ReservationSettingsDto;
+import com.example.demo.store.entity.OffDay;
 import com.example.demo.store.entity.OpenHour;
 import com.example.demo.store.entity.Seat;
 import com.example.demo.store.entity.SeatId;
 import com.example.demo.store.entity.StoresInfo;
+import com.example.demo.store.repository.OffDayRepository;
 import com.example.demo.store.repository.OpenHourRepository;
 import com.example.demo.store.repository.SeatRepository;
 import com.example.demo.store.repository.StoreInfoRepository;
@@ -21,15 +23,18 @@ public class StoreOperationService extends StoreBaseService {
 
     private final OpenHourRepository openHourRepository;
     private final SeatRepository seatRepository;
+    private final OffDayRepository offDayRepository;
 
     // 手動寫建構子來調用 super(...)
     public StoreOperationService(UserRepository userRepository,
             StoreInfoRepository storeInfoRepository,
             OpenHourRepository openHourRepository,
-            SeatRepository seatRepository) {
+            SeatRepository seatRepository,
+            OffDayRepository offDayRepository) {
         super(userRepository, storeInfoRepository);
         this.openHourRepository = openHourRepository;
         this.seatRepository = seatRepository;
+        this.offDayRepository = offDayRepository;
     }
 
     // 取得目前店家的預約設定
@@ -55,7 +60,7 @@ public class StoreOperationService extends StoreBaseService {
         dto.setOpenHours(ohDtos);
 
         // 3. 獲取座位設定
-        List<ReservationSettingsDto.SeatSettingsDto> sDtos = seatRepository.findByIdStoreId(storeId).stream()
+        List<ReservationSettingsDto.SeatSettingsDto> sDtos = seatRepository.findById_StoreId(storeId).stream()
                 .map(s -> {
                     ReservationSettingsDto.SeatSettingsDto sDto = new ReservationSettingsDto.SeatSettingsDto();
                     sDto.setSeatType(s.getId().getSeatType());
@@ -63,6 +68,18 @@ public class StoreOperationService extends StoreBaseService {
                     return sDto;
                 }).toList();
         dto.setSeatSettings(sDtos);
+
+        // 4. 獲取休假設定
+        List<ReservationSettingsDto.OffDayDto> odDtos = offDayRepository.findByStore_StoreId(storeId).stream()
+                .map(od -> {
+                    ReservationSettingsDto.OffDayDto odDto = new ReservationSettingsDto.OffDayDto();
+                    odDto.setOffDate(od.getOffDate().toString());
+                    odDto.setDayOfWeek(od.getDayOfWeek());
+                    odDto.setStartTime(od.getStartTime().toString());
+                    odDto.setEndTime(od.getEndTime().toString());
+                    return odDto;
+                }).toList();
+        dto.setOffDays(odDtos);
 
         return dto;
     }
@@ -119,6 +136,29 @@ public class StoreOperationService extends StoreBaseService {
                 return seat;
             }).toList();
             seatRepository.saveAll(newSeats);
+        }
+
+        // 5. 更新休假設定 (先刪除，後新增)
+        offDayRepository.deleteByStore_StoreId(storeId);
+        offDayRepository.flush(); // 強制執行刪除
+
+        if (dto.getOffDays() != null) {
+            List<OffDay> newOffDays = dto.getOffDays().stream().map(odDto -> {
+                LocalTime start = LocalTime.parse(odDto.getStartTime());
+                LocalTime end = LocalTime.parse(odDto.getEndTime());
+                // 阻擋跨日休假
+                if (!end.isAfter(start)) {
+                    throw new IllegalArgumentException("休假時間設定錯誤：結束時間必須晚於開始時間（日期 " + odDto.getOffDate() + "）");
+                }
+
+                OffDay od = new OffDay();
+                od.setStore(store);
+                od.setDayOfWeek(odDto.getDayOfWeek());
+                od.setStartTime(start);
+                od.setEndTime(end);
+                return od;
+            }).toList();
+            offDayRepository.saveAll(newOffDays);
         }
 
     }

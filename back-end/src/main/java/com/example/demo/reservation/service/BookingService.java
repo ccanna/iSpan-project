@@ -61,7 +61,7 @@ public class BookingService {
                 }).toList();
         dto.setOpenHours(ohDtos);
         // 4. 獲取座位設定
-        List<ReservationSettingsDto.SeatSettingsDto> sDtos = seatRepository.findByIdStoreId(storeId).stream()
+        List<ReservationSettingsDto.SeatSettingsDto> sDtos = seatRepository.findById_StoreId(storeId).stream()
                 .map(s -> {
                     ReservationSettingsDto.SeatSettingsDto sDto = new ReservationSettingsDto.SeatSettingsDto();
                     sDto.setSeatType(s.getId().getSeatType());
@@ -213,7 +213,7 @@ public class BookingService {
     // ----------使用者訂位管理----------
     // 1. 獲取使用者的所有訂位列表
     public List<BookingResponseDto> getBookingsByUser(Long userId) {
-        return bookingRepository.findByUserId(userId).stream()
+        return bookingRepository.findByUser_Id(userId).stream()
                 .map(this::convertToResponse)
                 .toList();
     }
@@ -243,7 +243,7 @@ public class BookingService {
     // ----------店家訂位管理----------
     // 1. 取得特定店家的訂位紀錄
     public List<BookingResponseDto> getBookingsByStore(Integer storeId) {
-        return bookingRepository.findByStoreId(storeId).stream()
+        return bookingRepository.findByStore_StoreId(storeId).stream()
                 .map(this::convertToResponse)
                 .toList();
     }

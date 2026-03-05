@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.store.entity.OffDay;
 
-public interface OffDayRepository extends JpaRepository<OffDay, Long> {
-    List<OffDay> findByStoreStoreId(Integer storeId);
+public interface OffDayRepository extends JpaRepository<OffDay, Integer> {
+    List<OffDay> findByStore_StoreId(Integer storeId);
+    void deleteByStore_StoreId(Integer storeId);
 }
