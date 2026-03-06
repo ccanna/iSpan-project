@@ -153,7 +153,7 @@ onMounted(() => {
 
                         <div v-if="bookings.length === 0" class="text-center py-5 text-muted">
                             <p class="mb-3">目前沒有訂位紀錄</p>
-                            <router-link to="/search" class="btn btn-gdg text-white px-4">
+                            <router-link to="/mapSearch" class="btn btn-gdg text-white px-4">
                                 <i class="bi bi-calendar-plus me-2"></i>現在就去訂位
                             </router-link>
                         </div>
