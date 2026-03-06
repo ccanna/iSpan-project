@@ -133,40 +133,61 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="user-bookings-container">
-        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-            <h4 class="mb-0">我的訂位管理</h4>
-            <div v-if="isLoading" class="spinner-border text-gdg spinner-border-sm" role="status">
-                <span class="visually-hidden">Loading...</span>
+    <div class="user-bookings-view">
+        <h4 class="mb-3 border-bottom pb-2">我的訂位</h4>
+
+        <div class="user-bookings-content">
+            <div v-if="isLoading" class="text-center py-5">
+                <div class="spinner-border text-gdg" role="status">
+                    <span class="visually-hidden">載入中...</span>
+                </div>
             </div>
-        </div>
 
-        <EditBookingData :bookings="bookings" role="user" @update="handleUpdate" @delete="handleDelete" />
+            <template v-else>
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-2">
+                        <h5 class="mb-0 text-gdg fw-bold"><i class="bi bi-calendar-check-fill me-2"></i>訂位紀錄管理</h5>
+                    </div>
+                    <div class="card-body">
+                        <EditBookingData :bookings="bookings" role="user" @update="handleUpdate" @delete="handleDelete" />
 
-        <div v-if="!isLoading && bookings.length === 0" class="text-center py-5 text-muted">
-            <p>目前沒有訂位紀錄</p>
-            <router-link to="/search" class="btn btn-outline-gdg mt-2">現在就去訂位</router-link>
-        </div>
+                        <div v-if="bookings.length === 0" class="text-center py-5 text-muted">
+                            <p class="mb-3">目前沒有訂位紀錄</p>
+                            <router-link to="/mapSearch" class="btn btn-gdg text-white px-4">
+                                <i class="bi bi-calendar-plus me-2"></i>現在就去訂位
+                            </router-link>
+                        </div>
+                    </div>
+                </div>
+            </template>
 
-        <div class="mt-4 text-muted small">
-            <p>* 提醒：使用者模式僅開放修改「姓名」與「電話」，如需更改時間請致電店家。</p>
+            <div class="mt-4 text-muted small p-3 bg-light rounded border-start border-4 border-gdg">
+                <p class="mb-0"><i class="bi bi-info-circle me-2"></i>提醒：使用者模式僅開放修改「姓名」與「電話」，如需更改時間請致電店家。</p>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped>
 .text-gdg {
-    color: #9f9572;
+    color: #9f9572 !important;
 }
 
-.btn-outline-gdg {
-    color: #9f9572;
-    border-color: #9f9572;
-    text-decoration: none;
+.bg-gdg {
+    background-color: #9f9572 !important;
 }
 
-.btn-outline-gdg:hover {
-    background-color: #9f9572;
-    color: white;
+.btn-gdg {
+    background-color: #9f9572 !important;
+    border-color: #9f9572 !important;
+}
+
+.btn-gdg:hover {
+    background-color: #8f8562 !important;
+    border-color: #8f8562 !important;
+}
+
+.border-gdg {
+    border-color: #9f9572 !important;
 }
 </style>

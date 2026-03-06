@@ -77,7 +77,7 @@ const goToReservation = () => {
             <div class="card shadow-sm mb-4">
                 <div class="row g-0">
                     <div class="col-md-5">
-                        <img :src="getImageUrl(coverImage)" class="img-fluid rounded-start h-100 object-fit-cover"
+                        <img :src="getImageUrl(coverImage)" class="img-fluid rounded-start h-100 object-fit-contain"
                             :alt="storeName">
                     </div>
                     <div class="col-md-7">

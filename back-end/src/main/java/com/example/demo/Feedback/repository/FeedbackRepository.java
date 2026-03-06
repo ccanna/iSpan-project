@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.Feedback.entity.Feedback;
+import com.example.demo.user.User;
 
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
@@ -15,5 +16,7 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     Page<Feedback> findAll(Pageable pageable);
 
     Page<Feedback> findByFeedbackStatus_StatusName(String statusName, Pageable pageable);
+
+    List<Feedback> findByUserOrderByCreatedAtDesc(User user);
 
 }

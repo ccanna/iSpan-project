@@ -86,8 +86,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/map/**").permitAll()
                         // 標籤列表：允許匿名存取（SearchBar 動態載入標籤不需要登入）
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/categories").permitAll()
-                        // --- 新增：放行客服表單 API ---
-                        .requestMatchers("/api/feedback/**").permitAll()
+                        // --- 新增：放行客服表單相關 API（公開） ---
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/feedback").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feedback/typeList").permitAll()
+                        // /api/feedback/userInfoList 需要登入（使用 @AuthenticationPrincipal）
                         // --- 新增：放行客服後台清單 GET（回覆 PUT 仍需認證）---
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feedbackList").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feedbackList/status-list")

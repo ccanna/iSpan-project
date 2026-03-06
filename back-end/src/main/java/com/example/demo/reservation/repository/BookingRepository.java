@@ -42,10 +42,10 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
         // 查詢特定使用者的有效訂單，並按照預約日期和開始時間倒序排列
         @Query("SELECT b FROM Booking b WHERE b.user.id = :userId AND b.status = true " +
                         "ORDER BY b.bookingDate DESC, b.startTime DESC")
-        List<Booking> findByUserId(@Param("userId") Long userId);
+        List<Booking> findByUser_Id(@Param("userId") Long userId);
 
         // 查詢特定店家的有效訂單，並按照預約日期和開始時間倒序排列
         @Query("SELECT b FROM Booking b WHERE b.store.storeId = :storeId AND b.status = true " +
                         "ORDER BY b.bookingDate DESC, b.startTime DESC")
-        List<Booking> findByStoreId(@Param("storeId") Integer storeId);
+        List<Booking> findByStore_StoreId(@Param("storeId") Integer storeId);
 }

@@ -14,3 +14,10 @@ export const getTypeList = () => {
 export const submitFeedback = (payload) => {
     return api.post("/feedback", payload);
 };
+
+/**
+ * 取得使用者自身的客訴紀錄
+ */
+export const getUserInfoList = () => {
+    return api.get("/feedback/userInfoList");
+};

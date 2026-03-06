@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import ReplyForm from '@/components/ReplyForm.vue';
 import { getFeedbackList, getStatusList, replyFeedback } from '@/api/feedbackAP';
 import { useAdminAuthStore } from '@/stores/adminAuth';
@@ -40,6 +40,11 @@ const loadFeedbacks = async (page = 0) => {
     isLoading.value = true;
     try {
         const data = await getFeedbackList(filterStatus.value || null, page);
+
+        // --- 這裡加入 Log 檢查 ---
+        console.log("API 回傳原始資料:", data);
+        console.log("Content 陣列長度:", data.content ? data.content.length : '無內容');
+
         feedbackList.value = data.content;
         totalPages.value   = data.totalPages;
         currentPage.value  = data.number;
@@ -62,6 +67,24 @@ const goToPage = (page) => {
         loadFeedbacks(page);
     }
 };
+
+// 計算要顯示的頁碼陣列（最多顯示 7 個，超過用省略號）
+const pageNumbers = computed(() => {
+    const total = totalPages.value;
+    const current = currentPage.value;
+    if (total <= 7) {
+        return Array.from({ length: total }, (_, i) => i);
+    }
+    const pages = [];
+    pages.push(0);
+    let start = Math.max(1, current - 2);
+    let end   = Math.min(total - 2, current + 2);
+    if (start > 1)  pages.push('...');
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < total - 2) pages.push('...');
+    pages.push(total - 1);
+    return pages;
+});
 
 // ─── 回覆 Modal ──────────────────────────────────────
 const openReplyModal = (item) => {
@@ -132,19 +155,18 @@ const formatDate = (dateStr) => {
         </div>
 
         <!-- Data Table -->
-        <div class="admin-card overflow-hidden">
-            <div class="table-responsive">
-                <table class="admin-table table table-hover mb-0 align-middle">
+        <div class="admin-card">
+            <div class="table-responsive" style="overflow-x: auto;">
+                <table class="admin-table table table-hover mb-0 align-middle" style="min-width: 900px;">
                     <thead>
                         <tr>
-                            <th scope="col" width="5%">#</th>
-                            <th scope="col" width="10%">類型</th>
-                            <th scope="col" width="13%">日期時間</th>
-                            <th scope="col" width="10%">姓名</th>
-                            <th scope="col" width="18%">聯絡方式</th>
-                            <th scope="col" width="25%">內容（前20字）</th>
-                            <th scope="col" width="9%">狀態</th>
-                            <th scope="col" width="10%">操作</th>
+                            <th scope="col" style="width:90px">類型</th>
+                            <th scope="col" style="width:130px">日期時間</th>
+                            <th scope="col" style="width:80px">姓名</th>
+                            <th scope="col" style="width:200px">聯絡方式</th>
+                            <th scope="col">內容</th>
+                            <th scope="col" style="width:80px">狀態</th>
+                            <th scope="col" style="width:80px">操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -157,7 +179,6 @@ const formatDate = (dateStr) => {
 
                         <template v-else>
                             <tr v-for="item in feedbackList" :key="item.id">
-                                <td>{{ item.id }}</td>
                                 <td>
                                     <span class="badge bg-secondary bg-opacity-10 text-secondary border">
                                         {{ item.typeName || '—' }}
@@ -165,7 +186,7 @@ const formatDate = (dateStr) => {
                                 </td>
                                 <td class="small text-muted">{{ formatDate(item.createdAt) }}</td>
                                 <td class="fw-medium">{{ item.name }}</td>
-                                <td class="small">
+                                <td class="small" style="word-break: break-all;">
                                     <div><i class="bi bi-envelope me-1"></i>{{ item.email }}</div>
                                     <div v-if="item.phone"><i class="bi bi-telephone me-1"></i>{{ item.phone }}</div>
                                 </td>
@@ -205,22 +226,40 @@ const formatDate = (dateStr) => {
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="d-flex justify-content-center align-items-center gap-3 mt-3">
+        <div v-if="totalPages > 0" class="d-flex justify-content-center align-items-center flex-wrap gap-1 mt-4">
+            <!-- 上一頁 -->
             <button
-                class="btn btn-sm btn-admin-outline"
+                class="btn btn-sm btn-admin-outline px-3"
                 :disabled="currentPage === 0"
                 @click="goToPage(currentPage - 1)"
             >
-                <i class="bi bi-chevron-left"></i> 上一頁
+                <i class="bi bi-chevron-left"></i>
             </button>
-            <span class="text-muted small">第 {{ currentPage + 1 }} / {{ totalPages }} 頁</span>
+
+            <!-- 頁碼 -->
+            <template v-for="(p, idx) in pageNumbers" :key="idx">
+                <span v-if="p === '...'" class="px-1 text-muted" style="line-height:2;">…</span>
+                <button
+                    v-else
+                    class="btn btn-sm"
+                    :class="p === currentPage ? 'btn-admin-primary text-white' : 'btn-admin-outline'"
+                    style="min-width: 36px;"
+                    @click="goToPage(p)"
+                >
+                    {{ p + 1 }}
+                </button>
+            </template>
+
+            <!-- 下一頁 -->
             <button
-                class="btn btn-sm btn-admin-outline"
+                class="btn btn-sm btn-admin-outline px-3"
                 :disabled="currentPage >= totalPages - 1"
                 @click="goToPage(currentPage + 1)"
             >
-                下一頁 <i class="bi bi-chevron-right"></i>
+                <i class="bi bi-chevron-right"></i>
             </button>
+
+            <span class="text-muted small ms-2">共 {{ totalPages }} 頁，每頁 10 筆</span>
         </div>
 
         <!-- Reply Modal -->
