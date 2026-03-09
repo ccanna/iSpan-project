@@ -92,6 +92,7 @@ export const useAdminAuthStore = defineStore('adminAuth', {
                     const latestAdminData = responseData?.data || responseData;
 
                     this.admin = { ...this.admin, ...latestAdminData };
+                    console.log('[syncAdminProfile] 更新 admin 資料，name:', this.admin?.name, '| position:', this.admin?.position);
                 } catch (error) {
                     console.error('[syncAdminProfile] API 請求發生錯誤:', error);
                 } finally {

@@ -32,19 +32,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
         try {
-            // 取得所有候選 Token（依優先順序排列）
-            List<String> candidates = getJwtCandidates(request);
+            // 取得當前請求「應該」使用的唯一 Token
+            String jwt = getTargetJwt(request);
 
-            for (String jwt : candidates) {
-                if (tokenProvider.validateToken(jwt)) {
-                    String email = tokenProvider.getEmailFromToken(jwt);
-                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    break; // 找到有效的就停止
-                }
+            if (jwt != null && tokenProvider.validateToken(jwt)) {
+                String email = tokenProvider.getEmailFromToken(jwt);
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
@@ -54,38 +51,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 回傳所有候選 JWT Token（依優先順序）。
-     * 若第一個 token 過期，doFilterInternal 會自動嘗試下一個。
+     * 嚴格判斷當前請求的上下文，只回傳對應的 Token。
+     * 絕對不可以因為 A 過期就去拿 B，這會導致身份嚴重錯亂 (例如前台拿後台的信箱去 User 表查而報錯)。
      */
-    private List<String> getJwtCandidates(HttpServletRequest request) {
-        List<String> candidates = new ArrayList<>();
-
-        // 1. Authorization Header（行動裝置 / 第三方系統 — 最高優先）
+    private String getTargetJwt(HttpServletRequest request) {
+        // 1. Authorization Header（給行動裝置或外部 API 使用）
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            candidates.add(bearerToken.substring(7));
-            return candidates; // Header 有就不看 Cookie
+            return bearerToken.substring(7);
         }
 
         String path = request.getRequestURI();
+        
+        // 2. 獲取前端明確指定的上下文提示
+        String contextHint = request.getHeader("X-Context-Hint");
+        boolean isAdminContext;
 
-        // 2. /api/admins/** 路徑：admin cookie 優先
-        if (path.startsWith("/api/admins")) {
-            addCookieIfPresent(candidates, request, "adminAccessToken");
-            addCookieIfPresent(candidates, request, "accessToken");
+        if (StringUtils.hasText(contextHint)) {
+            isAdminContext = "ADMIN".equals(contextHint);
         } else {
-            // 3. 其他路徑（/api/users 等）：都加入，讓 doFilterInternal 逐一驗證
-            addCookieIfPresent(candidates, request, "accessToken");
-            addCookieIfPresent(candidates, request, "adminAccessToken");
+            // 如果沒有標頭 (例如 Postman 或外部系統呼叫)，以 API URL 前綴為準
+            isAdminContext = path.startsWith("/api/admins") || 
+                             path.contains("/review") || 
+                             path.startsWith("/api/feedbackList");
         }
 
-        return candidates;
-    }
+        logger.debug(String.format("[JwtAuth] path=%s, contextHint=%s -> isAdminContext=%s", path, contextHint, isAdminContext));
 
-    private void addCookieIfPresent(List<String> list, HttpServletRequest request, String cookieName) {
-        Cookie cookie = WebUtils.getCookie(request, cookieName);
-        if (cookie != null && StringUtils.hasText(cookie.getValue())) {
-            list.add(cookie.getValue());
+        if (isAdminContext) {
+            // 在後台操作，只能讀取 Admin 的 Token
+            Cookie adminCookie = WebUtils.getCookie(request, "adminAccessToken");
+            if (adminCookie != null) {
+                logger.debug("[JwtAuth] extracted adminAccessToken");
+                return StringUtils.hasText(adminCookie.getValue()) ? adminCookie.getValue() : null;
+            }
+            return null;
+        } else {
+            // 在前台操作，只能讀取 User 的 Token
+            Cookie userCookie = WebUtils.getCookie(request, "accessToken");
+            if (userCookie != null) {
+                logger.debug("[JwtAuth] extracted accessToken");
+                return StringUtils.hasText(userCookie.getValue()) ? userCookie.getValue() : null;
+            }
+            return null;
         }
     }
 }

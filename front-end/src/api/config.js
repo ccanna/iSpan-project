@@ -21,9 +21,14 @@ const rawApi = axios.create({
 });
 
 // ===== Refresh 狀態管理 =====
-let refreshState = {
-    promise: null,      // 進行中的 refresh Promise
-    timestamp: 0,       // 上次成功 refresh 的時間戳
+// 前後台分開維護！避免 admin refresh 的 cooldown 影響前台 user refresh，反之亦然也成立。
+let userRefreshState = {
+    promise: null,
+    timestamp: 0,
+};
+let adminRefreshState = {
+    promise: null,
+    timestamp: 0,
 };
 
 // 5 秒內重複觸發的 401 共用同一個 refresh（防止 F5 瞬間多個請求同時觸發多次 refresh）
@@ -32,40 +37,64 @@ const REFRESH_COOLDOWN_MS = 5000;
 function doRefresh(isAdminContext) {
     const now = Date.now();
     const endpoint = isAdminContext ? '/admins/refresh' : '/auth/refresh';
+    const state = isAdminContext ? adminRefreshState : userRefreshState;
 
-    // 如果已有進行中的 refresh，或剛完成不久的 refresh，共用同一個 Promise
-    if (refreshState.promise) {
+    // 如果已有進行中的 refresh，共用同一個 Promise
+    if (state.promise) {
         console.log('[REFRESH] 共用已有的 refresh');
-        return refreshState.promise;
+        return state.promise;
     }
 
     // 如果剛成功 refresh 過（cooldown 期間），直接 resolve（Cookie 已更新）
-    if (now - refreshState.timestamp < REFRESH_COOLDOWN_MS) {
-        console.log('[REFRESH] 在冷卻期內，跳過重複 refresh');
+    if (now - state.timestamp < REFRESH_COOLDOWN_MS) {
+        const elapsed = ((now - state.timestamp) / 1000).toFixed(1);
+        console.log(`[REFRESH] 在冷卻期內（${elapsed}s 前剛換發過），跳過重複 refresh`);
         return Promise.resolve();
     }
 
     console.log(`[REFRESH] 啟動新 refresh → ${endpoint}`);
-    refreshState.promise = rawApi.post(`${BASE_URL}${endpoint}`)
+    state.promise = rawApi.post(`${BASE_URL}${endpoint}`)
         .then(() => {
             console.log('[REFRESH] 成功，Cookie 已更新');
-            refreshState.timestamp = Date.now();
+            state.timestamp = Date.now();
         })
         .catch(err => {
             console.error('[REFRESH] 失敗', err.response?.status);
             throw err;
         })
         .finally(() => {
-            refreshState.promise = null;
+            state.promise = null;
         });
 
-    return refreshState.promise;
+    return state.promise;
 }
+
+// 設定 Context Hint 的邏輯
+const addContextHint = (config) => {
+    if (config.url?.startsWith('/admins')) {
+        config.headers['X-Context-Hint'] = 'ADMIN';
+    } else if (config.url?.startsWith('/auth')) {
+        config.headers['X-Context-Hint'] = 'USER';
+    } else {
+        const isAdminPage = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+        config.headers['X-Context-Hint'] = isAdminPage ? 'ADMIN' : 'USER';
+    }
+    return config;
+};
 
 // ===== Request Interceptor =====
 api.interceptors.request.use(
     (config) => {
-        console.log(`[API REQ] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+        addContextHint(config);
+        console.log(`[API REQ] ${config.method?.toUpperCase()} ${config.baseURL}${config.url} (Context: ${config.headers['X-Context-Hint']})`);
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+rawApi.interceptors.request.use(
+    (config) => {
+        addContextHint(config);
         return config;
     },
     (error) => Promise.reject(error)
@@ -118,19 +147,20 @@ const createMethodWrapper = (methodName) => {
 
             try {
                 // 啟動或共用 Refresh 動作
+                console.log(`[REFRESH-WRAPPER] 準備 refresh，觸發來源 URL: ${url}`);
                 await doRefresh(isAdminContext);
 
-                console.warn(`[REFRESH-WRAPPER] Cookie 更新成功，準備用 ${methodName.toUpperCase()} 重新發送請求`);
-
-                // 完全用外殼重發一次 API 請求！這裡的 Promise 絕對純淨無瑕！
-                // 為了防呆，我們使用 api.request 再把原本的 config 傳進去
                 const retryConfig = { ...error.config };
+                
+                // 註解：不要隨便刪除 transformRequest，否則 FormData 和 JSON 資料格式會跑掉而導致 400 錯誤
+                // 但為了某些相容性問題，只刪除 adapter
                 delete retryConfig.adapter;
-                delete retryConfig.transformRequest;
-                delete retryConfig.transformResponse;
 
+                console.log(`[REFRESH-WRAPPER] 重送 ${methodName.toUpperCase()} ${url}`);
                 const finalResult = await api.request(retryConfig);
-                console.warn('[REFRESH-WRAPPER] 重發成功！拿到的最終資料鍵值:', Object.keys(finalResult || {}));
+
+                const resultType = finalResult && typeof finalResult === 'object' ? Object.keys(finalResult) : finalResult;
+                console.log(`[REFRESH-WRAPPER] 重送成功，拿到 keys:`, resultType);
 
                 return finalResult;
             } catch (refreshError) {

@@ -342,8 +342,15 @@ router.beforeEach(async (to, from, next) => {
 
     if (!adminAuthStore.isLoggedIn) {
       console.warn('[Router Admin] 仍未登入 → 跳至 /admin/login');
-      // [2026/03/06 修正] 交由 config.js 負責提示「登入逾期」與強制跳轉
-      // 這裡如果彈窗會干擾背後的 silent refresh 流程，所以只需擋下路由即可。
+      // [2026/03/06 修正] 為了不干擾 config.js 的「登入逾期」彈窗，這裡只針對「完全未登入」的狀態彈出提示
+      if (!wasAdminLoggedIn) {
+        Swal.fire({
+          icon: 'warning',
+          title: '請先登入',
+          text: '您尚未登入，該頁面需要登入才能訪問，請先登入',
+          confirmButtonColor: '#1e3c72'
+        });
+      }
       return next('/admin/login');
     }
 
@@ -400,7 +407,15 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (!authStore.isLoggedIn) {
-      // 交由 config.js 負責提示與強制登出跳轉，這裡只管擋下未登入路由
+      // 交由 config.js 負責提示登入逾期，這裡只管完全未登入的情境
+      if (!wasUserLoggedIn) {
+        Swal.fire({
+          icon: 'warning',
+          title: '請先登入',
+          text: '您尚未登入，該頁面需要登入才能訪問，請先登入',
+          confirmButtonColor: '#9f9572'
+        });
+      }
       return next('/login');
     }
   }
