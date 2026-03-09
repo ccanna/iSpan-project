@@ -3,27 +3,26 @@
 
 <template>
 <div class="banner-header"   >
-    <h1 class="banner-header-h1">Shop in style</h1>
-    <p class="banner-header-p">With this shop hompeage template</p>
+    <h1 style="margin-left: 20px;" class="banner-header-h1">Grace in Nature</h1>
+    <p  style="margin-left: 20px;" class="banner-header-p">Better everyday, kinder to the planet.</p>
 </div>
 
 </template>
 
 <style>
-/* .header {
-    background: #1f2428;
-    padding: 30px 0;
-    text-align: center;
-    color: #fff;
-} */
+
 
 .banner-header{
     background-image: url('/src/pictures/bannerBrown.jpg');
     width:2400px;
     height:300px;
+    
+
+
     background-size: cover; /* 關鍵：確保圖片填滿且不變形 */
     background-position: top; /* 圖片置中 */
-    background-repeat: no-repeat;
+    background-repeat: no-repeat; 
+    background-attachment: fixed; /* 讓背景圖片固定在視口 */
 }
 
 .header-cart {

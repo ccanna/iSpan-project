@@ -58,7 +58,7 @@
             </ul>
           </li>
 
-          <!-- 商品管理 -->
+          <!-- 商品管理
           <li class="nav-item has-submenu">
             <a href="#" class="nav-link" @click.prevent="toggleSubmenu('products')">
               <i class="bi bi-box-seam"></i>
@@ -70,7 +70,7 @@
               <li><router-link to="/admin/products/create" class="submenu-link">新增商品</router-link></li>
               <li><router-link to="/admin/products/categories" class="submenu-link">商品分類</router-link></li>
             </ul>
-          </li>
+          </li> -->
 
           <!-- 銷售管理 -->
           <li class="nav-item has-submenu">
@@ -89,7 +89,7 @@
           <li class="nav-item has-submenu">
               <a href="#" class="nav-link" @click.prevent="toggleSubmenu('products')">
                   <i class="bi bi-box-seam"></i>
-                  <span v-if="!sidebarCollapsed">Anna商品管理</span>
+                  <span v-if="!sidebarCollapsed">商品管理</span>
                   <i v-if="!sidebarCollapsed" class="bi bi-chevron-down submenu-arrow" :class="{ rotated: openSubmenu === 'products' }"></i>
               </a>
               <ul class="submenu" v-if="!sidebarCollapsed && openSubmenu === 'products'">
