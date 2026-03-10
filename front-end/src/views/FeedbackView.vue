@@ -175,9 +175,9 @@
             <i class="bi bi-line"></i>
           </div>
           <h3>LINE@ 官方帳號</h3>
-          <p class="line-id">@speedearn</p>
+          <p class="line-id">@TasteLand</p>
           <div class="qr-code-container">
-            <img src="/src/assets/line_qr_code.png" alt="LINE QR Code" class="qr-code">
+            <img src="https://raw.githubusercontent.com/merris3557/Project_TL_picture/refs/heads/main/MokData_Line.png" alt="LINE QR Code" class="qr-code">
             <small>掃描加入好友</small>
           </div>
         </div>
@@ -187,7 +187,7 @@
             <i class="bi bi-headset"></i>
           </div>
           <h3>客服專線</h3>
-          <p>0800-123-456<br><small>週一至週五 09:00-18:00</small></p>
+          <p>0800-888-178<br><small>週一至週五 09:00-18:00</small></p>
         </div>
 
         <div class="info-card">
