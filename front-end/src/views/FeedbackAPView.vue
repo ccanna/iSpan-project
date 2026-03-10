@@ -15,6 +15,7 @@ const filterStatus    = ref('');       // '' = 全部，否則為 statusName
 const statusOptions   = ref([]);       // 從 API 取得的 feedback_status 清單
 
 const showReplyModal  = ref(false);
+const showViewModal   = ref(false);
 const currentFeedback = ref(null);
 const isLoading       = ref(false);
 const isSubmitting    = ref(false);
@@ -94,6 +95,17 @@ const openReplyModal = (item) => {
 
 const closeReplyModal = () => {
     showReplyModal.value  = false;
+    currentFeedback.value = null;
+};
+
+// ─── 檢視 Modal ──────────────────────────────────────
+const openViewModal = (item) => {
+    currentFeedback.value = item;
+    showViewModal.value   = true;
+};
+
+const closeViewModal = () => {
+    showViewModal.value   = false;
     currentFeedback.value = null;
 };
 
@@ -208,10 +220,18 @@ const formatDate = (dateStr) => {
                                 </td>
                                 <td>
                                     <button
+                                        v-if="!item.reply"
                                         class="btn btn-sm btn-admin-primary"
                                         @click="openReplyModal(item)"
                                     >
                                         <i class="bi bi-reply-fill"></i> 回覆
+                                    </button>
+                                    <button
+                                        v-else
+                                        class="btn btn-sm btn-admin-outline"
+                                        @click="openViewModal(item)"
+                                    >
+                                        <i class="bi bi-eye"></i> 檢視
                                     </button>
                                 </td>
                             </tr>
@@ -279,6 +299,34 @@ const formatDate = (dateStr) => {
                             @submit="handleReplySubmit"
                             @cancel="closeReplyModal"
                         />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Modal -->
+        <div v-if="showViewModal" class="modal-backdrop fade show"></div>
+        <div v-if="showViewModal" class="modal fade show d-block" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-admin-primary text-white">
+                        <h5 class="modal-title">意見回饋與回覆</h5>
+                        <button type="button" class="btn-close btn-close-white" @click="closeViewModal"></button>
+                    </div>
+                    <div class="modal-body bg-light">
+                        <div class="mb-3">
+                            <label class="fw-bold text-admin-primary">意見回饋內容：</label>
+                            <span class="text-muted small ms-2">({{ formatDate(currentFeedback?.createdAt) }})</span>
+                            <div class="p-3 bg-white border rounded mt-2" style="white-space: pre-wrap;">{{ currentFeedback?.contents }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold text-admin-primary">回覆內容：</label>
+                            <span class="text-muted small ms-2">({{ formatDate(currentFeedback?.repliedAt) }})</span>
+                            <div class="p-3 bg-white border rounded mt-2" style="white-space: pre-wrap;">{{ currentFeedback?.reply }}</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-admin-primary" @click="closeViewModal">關閉</button>
                     </div>
                 </div>
             </div>

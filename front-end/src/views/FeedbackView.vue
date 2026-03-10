@@ -21,7 +21,7 @@
           <i class="bi bi-check-circle-fill"></i>
           <div>
             <strong>感謝您的回饋！</strong>
-            <p>回報編號：<span class="report-number">{{ reportNumber }}</span></p>
+            <p>回饋訊息編號：<span class="report-number">{{ reportNumber }}</span></p>
             <p>確認信已寄送至您的電子郵件</p>
           </div>
         </div>
@@ -72,14 +72,14 @@
               <i class="bi bi-exclamation-circle"></i>
               {{ errors.email }}
             </div>
-            <small class="form-hint">我們將透過此信箱回覆您的問題</small>
+            <small class="form-hint">我們將透過此信箱回覆您</small>
           </div>
 
           <!-- Contact Phone -->
           <div class="form-group">
-            <label for="contactPhone" class="form-label">
+            <label for="contactPhone" class="form-label required">
               <i class="bi bi-telephone"></i>
-              連絡電話 <span class="optional-badge">選填</span>
+              聯絡電話
             </label>
             <input
               id="contactPhone"
@@ -100,7 +100,7 @@
           <div class="form-group">
             <label for="issueType" class="form-label required">
               <i class="bi bi-tag"></i>
-              反應問題種類
+              回饋訊息類別
             </label>
             <select
               id="issueType"
@@ -109,7 +109,7 @@
               :class="{ 'is-invalid': errors.issueType }"
               @change="clearError('issueType')"
             >
-              <option value="" disabled>請選擇問題種類</option>
+              <option value="" disabled>請選擇回饋訊息類別</option>
               
               <option 
                v-for="type in issueTypes" 
@@ -125,7 +125,7 @@
           <div class="form-group">
             <label for="feedbackContent" class="form-label required">
               <i class="bi bi-chat-left-text"></i>
-              反映內容
+              回饋訊息
             </label>
             <textarea
               id="feedbackContent"
@@ -195,7 +195,7 @@
             <i class="bi bi-envelope-at"></i>
           </div>
           <h3>電子郵件</h3>
-          <p>support@speedearn.com</p>
+          <p>afterrr5pm@gmail.com</p>
         </div>
       </div>
     </div>
@@ -231,7 +231,7 @@ export default {
         // config.js 的 response interceptor 已回傳 response.data
         issueTypes.value = response;
       } catch (error) {
-        console.error('無法取得問題種類清單:', error);
+        console.error('無法取得回饋類別清單:', error);
       }
     };
 
@@ -264,7 +264,10 @@ export default {
         isValid = false;
       }
 
-      if (formData.value.contactPhone.trim()) {
+      if (!formData.value.contactPhone.trim()) {
+        errors.value.contactPhone = '請輸入聯絡電話';
+        isValid = false;
+      } else {
         const phoneRegex = /^[0-9-+()]*$/;
         if (!phoneRegex.test(formData.value.contactPhone)) {
           errors.value.contactPhone = '電話格式不正確';
@@ -284,7 +287,7 @@ export default {
       }
 
       if (!formData.value.issueType) {
-        errors.value.issueType = '請選擇問題種類';
+        errors.value.issueType = '請選擇回饋訊息類別';
         isValid = false;
       }
 
