@@ -52,9 +52,15 @@ const doLogin = async (dataToSubmit) => {
       showConfirmButton: false
     });
     
-    // 導向首頁或 dashboard+
-    router.push('/');
-    
+    // 若有登入前的重定向路徑，就回去；否則回首頁
+    const redirectPath = sessionStorage.getItem('redirectPath');
+      if (redirectPath) {
+        sessionStorage.removeItem('redirectPath');
+        router.push(redirectPath);
+      } else {
+      router.push('/');
+      }
+      
   } catch (error) {
     console.error('Login failed:', error);
     const errorMsg = error.response?.data?.message || '登入失敗，請重新嘗試';
@@ -98,6 +104,7 @@ const doLogin = async (dataToSubmit) => {
     isSubmitting.value = false;
   }
 };
+
 
 const handleLogin = async () => {
   if (isSubmitting.value) return;

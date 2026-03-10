@@ -53,7 +53,8 @@ const addToCart = async (item) => {
         });
 
         if(result.isConfirmed) {
-            sessionStorage.setItem  ('redirectPath', router.currentRoute.value.fullPath);
+            console.log('儲存跳轉路徑：', router.currentRoute.value.fullPath)
+            sessionStorage.setItem('redirectPath', router.currentRoute.value.fullPath);
             router.push('/login');
         }
         return;
