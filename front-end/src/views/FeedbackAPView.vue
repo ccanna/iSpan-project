@@ -315,7 +315,7 @@ const formatDate = (dateStr) => {
                     </div>
                     <div class="modal-body bg-light">
                         <div class="mb-3">
-                            <label class="fw-bold text-admin-primary">意見回饋內容：</label>
+                            <label class="fw-bold text-admin-primary">客戶回饋內容：</label>
                             <span class="text-muted small ms-2">({{ formatDate(currentFeedback?.createdAt) }})</span>
                             <div class="p-3 bg-white border rounded mt-2" style="white-space: pre-wrap;">{{ currentFeedback?.contents }}</div>
                         </div>
