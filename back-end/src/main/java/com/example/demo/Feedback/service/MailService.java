@@ -1,8 +1,10 @@
 package com.example.demo.Feedback.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
@@ -14,7 +16,7 @@ public class MailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendHtmlConfirmation(String toEmail, String ticketNumber) {
+    public void sendHtmlConfirmation(String toEmail, String ticketNumber, boolean isMember) {
         MimeMessage message = mailSender.createMimeMessage();
 
         try {
@@ -38,7 +40,7 @@ public class MailService {
                     "          <tr>" +
                     "            <td align='center' style='padding: 40px 0 20px 0; background-color: " + "#9f9572"
                     + ";'>" +
-                    "              <img src='https://github.com/merris3557/iSpan-project/blob/eab23152d018d5a1b969fad28277df7dbc17ccac/front-end/src/pictures/TL_Logo_forMail.png?raw=true' alt='饗島 Logo' width='120' style='display: block; '>"
+                    "              <img src='https://raw.githubusercontent.com/merris3557/Project_TL_picture/refs/heads/main/%E9%A5%97%E5%B3%B6.png' alt='饗島 Logo' width='120' style='display: block; '>"
                     + // filter: brightness(0) invert(1); 假設 Logo 是深色，這裡濾鏡轉白色
                     "            </td>" +
                     "          </tr>" +
@@ -53,29 +55,32 @@ public class MailService {
                     + "</strong>" +
                     "              </p>" +
                     "              <p style='color: #555555; font-size: 14px;'>" +
-                    "                我們的客服團隊將於 48 小時內進行核實並回覆至此信箱。感謝您的耐心等待。" +
+                    "                饗島客服團隊已收到您的來信，正全力處理您的訴求，我們將盡速回覆至此信箱與您聯繫。。" +
                     "              </p>" +
-                    "              " +
-                    "              <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top: 30px;'>"
+                    "              </p>" +
+                    (isMember
+                            ? "              <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top: 30px;'>"
+                                    +
+                                    "                <tr>" +
+                                    "                  <td align='center'>" +
+                                    "                    <a href='http://localhost:5173/userInfo/feedback' " +
+                                    "                       style='background-color: " + "#9f9572"
+                                    + "; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;'>"
+                                    +
+                                    "                       查看處理進度" +
+                                    "                    </a>" +
+                                    "                  </td>" +
+                                    "                </tr>" +
+                                    "              </table>"
+                            : "")
                     +
-                    "                <tr>" +
-                    "                  <td align='center'>" +
-                    "                    <a href='http://localhost:8081/complaint-status/" + ticketNumber + "' " +
-                    "                       style='background-color: " + "#9f9572"
-                    + "; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;'>"
-                    +
-                    "                       查看處理進度" +
-                    "                    </a>" +
-                    "                  </td>" +
-                    "                </tr>" +
-                    "              </table>" +
                     "            </td>" +
                     "          </tr>" +
                     "          " +
                     "          <tr>" +
                     "            <td style='padding: 20px 30px; background-color: #ffffff; text-align: center;'>" +
                     "              <p style='margin: 0; font-size: 12px; color: #999999;'>" +
-                    "                &copy; 2024 饗島 Taste Land Project. All rights reserved.<br>" +
+                    "                &copy; 2026 饗島 Taste Land Project. All rights reserved.<br>" +
                     "                此為系統自動發送，請勿直接回覆。" +
                     "              </p>" +
                     "            </td>" +
@@ -95,4 +100,127 @@ public class MailService {
             e.printStackTrace();
         }
     }
+
+    public void replyNotification(String toEmail, String caseNumber, String replyContent, boolean isMember) {
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom("afterrr5pm@gmail.com");
+            helper.setTo(toEmail);
+            helper.setSubject("【饗島】您的回饋反映已有回覆 - " + caseNumber);
+
+            String htmlContent = "<html>" +
+                    "<body style='margin: 0; padding: 0; background-color: #f9f9f9; font-family: Arial, sans-serif;'>" +
+                    "  <table width='100%' border='0' cellpadding='0' cellspacing='0'>" +
+                    "    <tr><td style='padding: 20px 0;'>" +
+                    "      <table align='center' width='600' style='background-color: #ffffff; border: 1px solid #eeeeee; border-collapse: collapse;'>"
+                    +
+                    "        " +
+                    "        <tr><td align='center' style='padding: 30px; background-color: #9f9572;'>" +
+                    "          <img src='https://raw.githubusercontent.com/merris3557/Project_TL_picture/refs/heads/main/%E9%A5%97%E5%B3%B6.png' width='100' style='filter: brightness(0) invert(1);'>"
+                    +
+                    "        </td></tr>" +
+                    "        " +
+                    "        <tr><td style='padding: 40px 30px; background-color: rgba(160, 150, 115, 0.05);'>" +
+                    "          <h2 style='color: #776f54;'>客服回覆通知</h2>" +
+                    "          <p style='color: #555;'>親愛的用戶您好，關於您的案件 <strong>" + caseNumber
+                    + "</strong>，客服人員已處理完畢：</p>" +
+                    "          <div style='background: #ffffff; padding: 20px; border-left: 4px solid #9f9572; margin: 20px 0; color: #333; font-style: italic;'>"
+                    +
+                    "            " + replyContent + // 這裡放入管理員寫的回覆內容
+                    "          </div>" +
+                    "          <p style='font-size: 14px; color: #777;'>若您對回覆內容有任何疑問，歡迎再次聯繫我們。</p>" +
+                    (isMember
+                            ? "              <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top: 30px;'>"
+                                    +
+                                    "                <tr>" +
+                                    "                  <td align='center'>" +
+                                    "                    <a href='http://localhost:5173/userInfo/feedback' " +
+                                    "                       style='background-color: #9f9572; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;'>"
+                                    +
+                                    "                       查看處理進度" +
+                                    "                    </a>" +
+                                    "                  </td>" +
+                                    "                </tr>" +
+                                    "              </table>"
+                            : "")
+                    +
+                    "        </td></tr>" +
+                    "        " +
+                    "        <tr><td style='padding: 20px; text-align: center; font-size: 12px; color: #999;'>" +
+                    "          &copy; 2026 饗島 Taste Land Project. All rights reserved.<br>" +
+                    "                此為系統自動發送，請勿直接回覆。" +
+                    "        </td></tr>" +
+                    "      </table>" +
+                    "    </td></tr>" +
+                    "  </table>" +
+                    "</body>" +
+                    "</html>";
+
+            helper.setText(htmlContent, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+public void sendBookingNotification(String toEmail, String guestName, String storeName, 
+                                    String date, String time, int guestCount, String type) {
+    jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
+    
+    // 強制轉型成字串（雖然 String.format 支援 %d，但轉型後比較保險）
+    String countStr = String.valueOf(guestCount);
+
+    try {
+        org.springframework.mail.javamail.MimeMessageHelper helper = 
+            new org.springframework.mail.javamail.MimeMessageHelper(mimeMessage, "UTF-8");
+
+        helper.setFrom("afterrr5pm@gmail.com");
+        helper.setTo(toEmail);
+        
+        // 根據 type 決定主旨與標題
+        String subjectTag;
+        String headMessage;
+        String color; // 增加顏色區分，取消用紅色，更新用藍色
+
+        switch (type) {
+            case "UPDATE":
+                subjectTag = "【訂位變更通知】";
+                headMessage = "您的訂位資訊已成功更新";
+                color = "#2196F3";
+                break;
+            case "CANCEL":
+                subjectTag = "【訂位取消確認】";
+                headMessage = "您的訂位已成功取消";
+                color = "#F44336";
+                break;
+            default:
+                subjectTag = "【訂位成功確認】";
+                headMessage = "您的訂位已完成";
+                color = "#4CAF50";
+        }
+
+        helper.setSubject(subjectTag + storeName);
+        
+        String htmlContent = String.format(
+            "<h3 style='color:%s;'>親愛的 %s 您好：</h3>" +
+            "<p>%s！以下是您的預約明細：</p>" +
+            "<ul>" +
+            "  <li>餐廳名稱：<b>%s</b></li>" +
+            "  <li>訂位日期：%s</li>" +
+            "  <li>訂位時間：%s</li>" +
+            "  <li>用餐人數：%s 人</li>" + // 這裡傳入轉型後的字串
+            "</ul>" +
+            "<p>如有任何問題，請洽餐廳專線。期待再次為您服務！</p>",
+            color, guestName, headMessage, storeName, date, time, countStr
+        );
+
+        helper.setText(htmlContent, true);
+        mailSender.send(mimeMessage);
+        System.out.println(">>>> [" + type + "] 郵件已發送至 " + toEmail);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
 }

@@ -14,16 +14,20 @@ const props = defineProps({
         })
     }
 })
+const getImageUrl = (imgName) => {
+    if (!imgName) return 'https://placehold.co/150';
+    return `/pictures/StoreProfile/${imgName}`;
+};
 </script>
 
 <template>
     <div class="card mb-3 card-gdg rounded-4 overflow-hidden">
         <div class="row g-0">
             <div class="col-md-4">
-                <img :src="props.store.coverImage || 'https://placehold.co/150'"
-                     class="img-fluid rounded-start h-100 object-fit-cover"
-                     :alt="props.store.storeName"
-                     style="min-height: 150px;">
+                <img :src="getImageUrl(props.store.coverImage)"
+                    class="img-fluid rounded-start h-100 object-fit-contain"
+                    :alt="props.store.storeName"
+                    style="min-height: 150px;">
             </div>
             <div class="col-md-8">
                 <div class="card-body">
@@ -59,8 +63,8 @@ const props = defineProps({
 </template>
 
 <style scoped>
-.object-fit-cover {
-    object-fit: cover;
+.object-fit-contain {
+    object-fit: contain;
     width: 100%;
 }
 .description-text {

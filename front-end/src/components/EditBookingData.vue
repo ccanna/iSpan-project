@@ -47,10 +47,8 @@ const minDate = `${year}-${month}-${day}`;
 
 <template>
     <div class="booking-table-container">
-        <h2 class="text-gdg h4 mb-3">
-            {{ role === 'shop' ? '門店預約管理' : '我的訂位紀錄' }}
-        </h2>
-        <table class="table table-hover gdg-table">
+        <div class="table-responsive">
+            <table class="table table-hover gdg-table">
             <thead>
                 <tr>
                     <th style="width: 100px;">訂位編號</th>
@@ -123,7 +121,8 @@ const minDate = `${year}-${month}-${day}`;
                     </template>
                 </tr>
             </tbody>
-        </table>
+            </table>
+        </div>
     </div>
 </template>
 

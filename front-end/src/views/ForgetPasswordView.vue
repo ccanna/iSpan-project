@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import BaseCard from '@/components/common/BaseCard.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
 import { authAPI } from '@/api/auth';
+import Swal from 'sweetalert2';
 
 const router = useRouter();
 const email = ref('');
@@ -19,10 +20,31 @@ const handleSendResetLink = async () => {
         console.log('Forgot password request with:', data);
         const response = await authAPI.forgotPassword(data);
         console.log('Forgot password success:', response);
-        alert(`重設密碼信件已發送至 ${email.value}`);
+        
+        await Swal.fire({
+            icon: 'success',
+            title: '重設信件已發送',
+            text: `重設密碼信件已發送至 ${email.value}`,
+            confirmButtonColor: '#9f9572'
+        });
+        
+        router.push('/login');
     } catch (error) {
         console.error('Forgot password failed:', error);
-        alert(`發送請求失敗 (預計傳送到後端的 JSON):\n${JSON.stringify(data, null, 2)}`);
+        
+        let errorMessage = '請稍後再試。';
+        if (error.response && error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: '發送請求失敗',
+            text: errorMessage,
+            confirmButtonColor: '#9f9572'
+        });
     } finally {
         isSubmitting.value = false;
     }
@@ -63,22 +85,6 @@ const debugGoToReset = () => {
                     >
                 </div>
 
-                <div class="mb-4">
-                    <div class="text-center mb-3">
-                        <span class="fw-bold fs-5">驗證您的帳戶</span>
-                    </div>
-                    
-                    <!-- Placeholder for CAPTCHA / Turnstile -->
-                    <div class="captcha-placeholder p-4 border rounded bg-light text-center">
-                        <div class="d-flex justify-content-center align-items-center gap-3">
-                            <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
-                            <span class="text-muted small">Cloudflare Turnstile 載入中... (預留位置)</span>
-                        </div>
-                        <div class="mt-2 text-muted" style="font-size: 0.75rem;">
-                            此處將放置驗證功能以防止機器人攻擊
-                        </div>
-                    </div>
-                </div>
 
                 <div class="d-grid gap-2">
                     <BaseButton 
@@ -113,11 +119,6 @@ const debugGoToReset = () => {
     border-color: #0969da;
     box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
     background-color: #fff;
-}
-
-.captcha-placeholder {
-    border: 1px solid #d0d7de !important;
-    background-color: #f6f8fa !important;
 }
 
 .bg-gdg-light {

@@ -1,36 +1,83 @@
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import BaseCard from '@/components/common/BaseCard.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
 import { authAPI } from '@/api/auth';
+import Swal from 'sweetalert2';
 
 const router = useRouter();
+const route = useRoute();
 const newPassword = ref('');
 const confirmPassword = ref('');
 const isSubmitting = ref(false);
 
 const handleResetPassword = async () => {
+    // 1. 檢查密碼格式 (至少8碼，包含大小寫、數字、特殊符號)
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword.value)) {
+        Swal.fire({
+            icon: 'error',
+            title: '格式錯誤',
+            text: '密碼格式有誤',
+            confirmButtonColor: '#9f9572'
+        });
+        return;
+    }
+
     if (newPassword.value !== confirmPassword.value) {
-        alert("兩次輸入的密碼不一致");
+        Swal.fire({
+            icon: 'error',
+            title: '錯誤',
+            text: '兩次輸入的密碼不一致'
+        });
         return;
     }
 
     isSubmitting.value = true;
+    const token = route.query.token;
+
+    if (!token) {
+        Swal.fire({
+            icon: 'error',
+            title: '錯誤',
+            text: '無效的重設連結（缺少 Token）'
+        });
+        isSubmitting.value = false;
+        return;
+    }
+
     const data = { 
-        password: newPassword.value 
-        // token would usually be from query params
+        newPassword: newPassword.value,
+        confirmPassword: confirmPassword.value,
+        token: token
     };
 
     try {
         console.log('Reset password request with:', data);
         const response = await authAPI.resetPassword(data);
         console.log('Reset password success:', response);
-        alert("密碼重設成功！請使用新密碼登入。");
+        await Swal.fire({
+            icon: 'success',
+            title: '成功',
+            text: '密碼重設成功！請使用新密碼登入。'
+        });
         router.push('/login');
     } catch (error) {
         console.error('Reset password failed:', error);
-        alert(`重設請求失敗 (預計傳送到後端的 JSON):\n${JSON.stringify(data, null, 2)}`);
+        
+        let errorMessage = '請稍後再試。';
+        if (error.response && error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: '重設請求失敗',
+            text: errorMessage
+        });
     } finally {
         isSubmitting.value = false;
     }
@@ -57,6 +104,9 @@ const handleResetPassword = async () => {
                         placeholder="請輸入新密碼"
                         required
                     >
+                    <div class="form-text text-muted mt-1" style="font-size: 0.8rem;">
+                        *密碼需至少 8 個字元，並包含大小寫英文字母、數字及特殊符號
+                    </div>
                 </div>
 
                 <div class="mb-4">

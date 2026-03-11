@@ -6,6 +6,7 @@ import com.example.demo.store.entity.StoresInfo;
 import com.example.demo.store.repository.CategoryRepository;
 import com.example.demo.store.repository.StoreInfoRepository;
 import com.example.demo.user.UserRepository;
+import com.example.demo.common.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +28,17 @@ public class StoreInfoService extends StoreBaseService {
     private String uploadDir;
 
     // 手動寫建構子來調用 super(...)
-    public StoreInfoService(UserRepository userRepository, 
-                            StoreInfoRepository storeInfoRepository, 
-                            CategoryRepository categoryRepository) {
+    public StoreInfoService(UserRepository userRepository,
+            StoreInfoRepository storeInfoRepository,
+            CategoryRepository categoryRepository) {
         super(userRepository, storeInfoRepository); // 將依賴傳遞給父類別
         this.categoryRepository = categoryRepository;
+    }
+
+    // 根據 ID 取得店家資訊 (公開 API 使用)
+    public StoresInfo getStoreById(Integer id) {
+        return storeInfoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("找不到 ID 為 " + id + " 的店家"));
     }
 
     // 更新店家資訊，預設輸入 null，表示不更新該欄位資料
@@ -112,7 +119,7 @@ public class StoreInfoService extends StoreBaseService {
 
     // 圖片上傳的執行
     private void imageUpload(StoresInfo store, MultipartFile file) {
-        if(file.isEmpty()) {
+        if (file.isEmpty()) {
             throw new IllegalArgumentException("上傳的圖片檔案不得為空");
         }
         try {

@@ -9,6 +9,13 @@ export const storeAPI = {
     },
 
     /**
+     * 根據 ID 獲取店家資訊
+     */
+    getStoreInfoById(id) {
+        return api.get(`/owner/store/${id}`);
+    },
+
+    /**
      * 更新當前店家的資訊
      * @param {Object|FormData} data - 店家資訊物件或 FormData (包含圖片)
      */
@@ -26,6 +33,20 @@ export const storeAPI = {
      */
     getAllCategories() {
         return api.get('/categories');
+    },
+
+    /**
+     * 獲取當前店家的預約與座位設定
+     */
+    getReservationSettings() {
+        return api.get('/owner/store/reservation-settings');
+    },
+
+    /**
+     * 更新當前店家的預約與座位設定
+     */
+    updateReservationSettings(data) {
+        return api.put('/owner/store/reservation-settings', data);
     }
 };
 

@@ -31,6 +31,17 @@ public class StoreInfoController {
         }
     }
 
+    // 根據 ID 獲取店家資訊 (公開端點)
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<StoresInfo>> getStoreInfoById(@PathVariable Integer id) {
+        try {
+            StoresInfo store = storeInfoService.getStoreById(id);
+            return ResponseEntity.ok(ApiResponse.success(store));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
     // 更新當前店家的資訊 (支援圖片上傳，使用 multipart/form-data)
     @PutMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<StoresInfo>> updateMyStoreInfo(@Valid @ModelAttribute StoreCreateUpdateDto dto) {

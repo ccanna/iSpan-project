@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import Swal from 'sweetalert2'
+import cartAPI from '../api/cart'
 
 export const useCartStore = defineStore('cart', {
     state: () => ({
         // 從 localStorage 讀取，若無則為空陣列
-        items: JSON.parse(localStorage.getItem('cart')) || []
+        items: [] //存放購物車內容(DTO)
     }),
 
     getters: {
@@ -19,55 +20,98 @@ export const useCartStore = defineStore('cart', {
     actions: {
         // 所有的 function 必須都在 actions 的這個大括號裡面！
 
-        addToCart(product) {
-            const existing = this.items.find(i => i.id === product.id)
-            if (existing) {
-                if (!product.stock || existing.quantity < product.stock) {
-                    existing.quantity += (product.quantity || 1)
-                } else {
-                    Swal.fire('提示', '已達庫存上限', 'warning')
+        async fetchCart() {
+            try {
+                const response = await cartAPI.getAll();
+                this.items = response || [];
+                console.log('購物車同步成功', this.items)
+            } catch (error) {
+                console.error('獲取購物車失敗', error)
+                this.items = [];
+            }
+        },
+
+        //加入購物車 對應/api/cart/add
+        async addToCart(product) {
+
+            try {
+                await cartAPI.add({
+                    productId: product.id,
+                    quantity: product.quantity || 1
+                })
+                await this.fetchCart(); //加入商品後自動更新購物車
+            } catch (error) {
+                console.error('加入購物車失敗', error)
+                throw error
+            }
+        },
+
+
+        async increase(cartDetailsId) {
+            const item = this.items.find(i => i.id === cartDetailsId)
+            if (item) {
+                // 檢查庫存上限
+                if (item.quantity >= item.stock) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '已達庫存上限',
+                        text: `此商品僅剩 ${item.stock} 件`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    })
                     return
                 }
-            } else {
-                // 修正：補上缺失的 t (this.items)
-                this.items.push({ ...product, quantity: product.quantity || 1 })
-            }
-            this.saveToStorage()
-        },
-
-        increase(id) {
-            const item = this.items.find(i => i.id === id)
-
-            // 注意：確保傳入的 item 物件裡有 stock 屬性
-            if (!item.stock || item.quantity < item.stock) {
-                item.quantity++
-                this.saveToStorage()
-            } else {
-                Swal.fire('提示', '已達庫存上限囉！', 'warning')
+                await this.addToCart({ id: item.productId, quantity: 1 })
             }
         },
 
 
-        decrease(id) {
-            const item = this.items.find(i => i.id === id)
+        async decrease(cartDetailsId) {
+            const item = this.items.find(i => i.id === cartDetailsId)
             if (item) {
                 if (item.quantity > 1) {
-                    item.quantity--
+                    await this.addToCart({ id: item.productId, quantity: -1 })
                 } else {
-                    this.remove(id)
+                    await this.remove(cartDetailsId)
                 }
-                this.saveToStorage()
             }
         },
 
-        remove(id) {
-            this.items = this.items.filter(i => i.id !== id)
-            this.saveToStorage()
+
+
+        async remove(cartDetailsId) {
+
+            try {
+                await cartAPI.delete(cartDetailsId)
+
+                const index = this.items.findIndex(i => i.id === cartDetailsId)
+                if (index !== -1) {
+                    this.items.splice(index, 1);
+                    console.log(`商品ID ${cartDetailsId}已成功從資料庫與前端刪除`)
+                }
+            } catch (error) {
+                console.error("刪除失敗", error)
+                Swal.fire('錯誤', '無法移除商品', 'error')
+            }
         },
 
-        saveToStorage() {
-            // 修正：補上缺失的 t (setItem)
-            localStorage.setItem('cart', JSON.stringify(this.items))
+        async updateQuantityToStock(productName, remainStock) {
+            try {
+                await cartAPI.sync()       // 呼叫後端同步庫存
+                await this.fetchCart()     // 重新載入購物車
+            } catch (error) {
+                console.error('同步庫存失敗', error)
+            }
+        },
+
+
+        clearCart() {
+            this.items = [];
         }
-    } // actions 結束
+
+    }
 })
+
+
+
+

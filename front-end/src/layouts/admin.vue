@@ -1,11 +1,11 @@
 <template>
   <div class="admin-layout">
     <!-- Sidebar -->
-    <aside class="admin-sidebar" :class="{ collapsed: sidebarCollapsed }">
+    <aside class="admin-sidebar" :class="{ collapsed: sidebarCollapsed, 'mobile-open': mobileOpen }">
       <div class="sidebar-header">
         <div class="logo-container">
           <i class="bi bi-speedometer2"></i>
-          <span v-if="!sidebarCollapsed" class="logo-text">速賺家後台系統</span>
+          <span v-if="!sidebarCollapsed" class="logo-text">饗島後台管理系統</span>
         </div>
       </div>
 
@@ -101,7 +101,7 @@
 
           <!-- 客服管理 -->
           <li class="nav-item">
-            <router-link to="/feedbackAP" class="nav-link">
+            <router-link to="/admin/feedbackAP" class="nav-link">
               <i class="bi bi-headset"></i>
               <span v-if="!sidebarCollapsed">客服管理</span>
             </router-link>
@@ -139,12 +139,15 @@
       </div>
     </aside>
 
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" v-if="mobileOpen" @click="mobileOpen = false"></div>
+
     <!-- Main Content Area -->
     <div class="admin-main" :class="{ expanded: sidebarCollapsed }">
       <!-- Top Header -->
       <header class="admin-header">
         <div class="header-left">
-          <button class="menu-toggle" @click="toggleSidebar">
+          <button class="menu-toggle" @click="toggleMobileSidebar">
             <i class="bi bi-list"></i>
           </button>
           <!-- Breadcrumb -->
@@ -167,10 +170,10 @@
             
             <!-- Dropdown Menu -->
             <div class="user-dropdown">
-              <a href="#" class="dropdown-item">
+              <router-link to="/admin/forgot-password" class="dropdown-item">
                 <i class="bi bi-person-gear"></i>
-                編輯個人資料
-              </a>
+                修改密碼
+              </router-link>
               <div class="dropdown-divider"></div>
               <a href="#" class="dropdown-item text-danger" @click.prevent="handleLogout">
                 <i class="bi bi-box-arrow-right"></i>
@@ -190,7 +193,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAdminAuthStore } from '@/stores/adminAuth';
 import { storeToRefs } from 'pinia';
@@ -207,12 +210,27 @@ export default {
     
     const sidebarCollapsed = ref(false);
     const openSubmenu = ref(null);
+    const mobileOpen = ref(false);
+
+    watch(() => route.path, () => {
+      if (window.innerWidth <= 768) {
+        mobileOpen.value = false;
+      }
+    });
 
     const toggleSidebar = () => {
+      if (window.innerWidth <= 768) {
+        mobileOpen.value = false;
+        return;
+      }
       sidebarCollapsed.value = !sidebarCollapsed.value;
       if (sidebarCollapsed.value) {
         openSubmenu.value = null;
       }
+    };
+
+    const toggleMobileSidebar = () => {
+      mobileOpen.value = !mobileOpen.value;
     };
 
     const toggleSubmenu = (menu) => {
@@ -254,7 +272,9 @@ export default {
     return {
       sidebarCollapsed,
       openSubmenu,
+      mobileOpen,
       toggleSidebar,
+      toggleMobileSidebar,
       toggleSubmenu,
       currentSection,
       currentPage,
@@ -659,6 +679,17 @@ export default {
 
   .admin-main {
     margin-left: 0;
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
   }
 }
 </style>

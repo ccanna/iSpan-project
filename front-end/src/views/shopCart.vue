@@ -1,10 +1,25 @@
 <script setup>
+import { ref } from 'vue';
 import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router';
 import BaseButton from '@/components/common/BaseButton.vue';
+import { onMounted } from 'vue';
 
 const router = useRouter();
 const cartStore = useCartStore()
+const outOfStockItem = ref('')
+
+
+//確保進入畫面就拿最新的資料
+onMounted( async () => {
+    await cartStore.fetchCart();
+    // 讀取庫存不足的商品名稱
+    const item = sessionStorage.getItem('outOfStockItem')
+    if (item) {
+        outOfStockItem.value = item
+        sessionStorage.removeItem('outOfStockItem')  // 讀完就清掉
+    }
+})
 
 const goToCheckOut = () =>{
     //點擊進入結帳
@@ -19,9 +34,9 @@ const backToShop = () =>{
 
 <template>
 
-    <table class="table" v-if="cartStore.items.length" style="vertical-align: middle" >
+    <table class="table"  v-if="cartStore.items.length" style="vertical-align: middle ; margin-left:25px ; margin-right:25px"  >
         <thead>
-        <tr>
+        <tr >
             <th style="font-size: 20px; padding-bottom: 30px; padding-top: 30px">商品</th>
             <th style="font-size: 20px; padding-bottom: 30px; padding-top: 30px">價格</th>
             <th style="font-size: 20px; padding-bottom: 30px; padding-top: 30px">數量</th>
@@ -31,9 +46,14 @@ const backToShop = () =>{
         </thead>
 
         <tbody >
-        <tr  v-for="item in cartStore.items"  :key="item.id">
-            <img :src="item.image" width=200px height="200px" class="card-img-left" :alt="item.productName" />
-            <td >{{ item.name }}</td>
+        <tr  v-for="item in cartStore.items"  :key="item.id" :class="{ 'out-of-stock-row': item.outOfStock }">
+            <img :src="item.image " width=200px height="200px" class="card-img-left" :alt="item.productName" />
+            <td >{{ item.productName }}
+                <span v-if="item.outOfStock"  
+                style="color: #dc3545; font-size: 0.8rem; display: block;">
+                ⚠ 庫存不足，請刪除或調整數量
+                </span>
+            </td>
             <td>NT$ {{ item.price }}</td>
             
                 <td>
@@ -52,6 +72,7 @@ const backToShop = () =>{
                             class="square-btn right-round" 
                             size="sm"
                             @click="cartStore.increase(item.id)"
+                            :disabled="item.outOfStock"
                         >
                             <i class="bi bi-plus-lg"></i>
                         </BaseButton>
@@ -80,8 +101,8 @@ const backToShop = () =>{
     </div>
 
 
-    <div class="text-right">
-        <p style="font-size: 16px;">共:  {{ cartStore.totalQuantity }} 項商品</p>
+    <div class="text-right" style="margin-right:60px">
+        <p style="font-size: 16px;">共:  {{ cartStore.totalQuantity }} 項商品 </p>
 
         <p style="font-size: 20px;">總金額：NT$ {{ cartStore.totalPrice }}</p>
     </div>
@@ -89,7 +110,7 @@ const backToShop = () =>{
     
 
     <hr/>
-    <div class="action-buttons-row">
+    <div class="action-buttons-row" style="margin-right:30px">
         <div class="button-group-right" v-if="cartStore.items.length">
             <BaseButton 
                 color="outline-gdg"
@@ -169,4 +190,24 @@ const backToShop = () =>{
     margin-top: 20px;
     margin-bottom: 20px;
 }   
+
+.out-of-stock-row {
+    opacity: 0.4;
+    background-color: #f5f5f5;
+    position: relative;
+}
+
+.out-of-stock-row td,
+.out-of-stock-row img {
+    filter: grayscale(50%);
+}
+.out-of-stock-row {
+    opacity: 0.45;
+    background-color: #f5f5f5;
+}
+
+.out-of-stock-row img {
+    filter: grayscale(60%);
+}
 </style>
+

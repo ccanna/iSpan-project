@@ -14,6 +14,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.servlet.http.Cookie;
+import org.springframework.web.util.WebUtils;
 
 @Component
 @RequiredArgsConstructor
@@ -27,16 +32,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
         try {
-            String jwt = getJwtFromRequest(request);
+            // 取得當前請求「應該」使用的唯一 Token
+            String jwt = getTargetJwt(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+            if (jwt != null && tokenProvider.validateToken(jwt)) {
                 String email = tokenProvider.getEmailFromToken(jwt);
-
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception ex) {
@@ -46,11 +50,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String getJwtFromRequest(HttpServletRequest request) {
+    /**
+     * 嚴格判斷當前請求的上下文，只回傳對應的 Token。
+     * 絕對不可以因為 A 過期就去拿 B，這會導致身份嚴重錯亂 (例如前台拿後台的信箱去 User 表查而報錯)。
+     */
+    private String getTargetJwt(HttpServletRequest request) {
+        // 1. Authorization Header（給行動裝置或外部 API 使用）
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-        return null;
+
+        String path = request.getRequestURI();
+        
+        // 2. 獲取前端明確指定的上下文提示
+        String contextHint = request.getHeader("X-Context-Hint");
+        boolean isAdminContext;
+
+        if (StringUtils.hasText(contextHint)) {
+            isAdminContext = "ADMIN".equals(contextHint);
+        } else {
+            // 如果沒有標頭 (例如 Postman 或外部系統呼叫)，以 API URL 前綴為準
+            isAdminContext = path.startsWith("/api/admins") || 
+                             path.contains("/review") || 
+                             path.startsWith("/api/feedbackList");
+        }
+
+        logger.debug(String.format("[JwtAuth] path=%s, contextHint=%s -> isAdminContext=%s", path, contextHint, isAdminContext));
+
+        if (isAdminContext) {
+            // 在後台操作，只能讀取 Admin 的 Token
+            Cookie adminCookie = WebUtils.getCookie(request, "adminAccessToken");
+            if (adminCookie != null) {
+                logger.debug("[JwtAuth] extracted adminAccessToken");
+                return StringUtils.hasText(adminCookie.getValue()) ? adminCookie.getValue() : null;
+            }
+            return null;
+        } else {
+            // 在前台操作，只能讀取 User 的 Token
+            Cookie userCookie = WebUtils.getCookie(request, "accessToken");
+            if (userCookie != null) {
+                logger.debug("[JwtAuth] extracted accessToken");
+                return StringUtils.hasText(userCookie.getValue()) ? userCookie.getValue() : null;
+            }
+            return null;
+        }
     }
 }

@@ -33,23 +33,37 @@ const updateQuantity = (val) => {
     }
 };
 
-const handleAddToCart = () => {
-    cartStore.addToCart({
+const handleAddToCart = async () => {
+    if (products.value.stock <= 0) {
+        Swal.fire('補貨中', '此商品目前無庫存', 'warning')
+        return
+    }
+    
+    try{
+        await cartStore.addToCart({
         id: products.value.id,
         name: products.value.productName,
         price: products.value.price,
         image: products.value.image,
         stock: products.value.stock, // 傳遞庫存給購物車
         quantity: buyQuantity.value // 傳遞選購數量
-    });
+        });
 
-    Swal.fire({
-        icon: 'success',
-        title: '成功加入購物車',
-        text: `已加入 ${buyQuantity.value} 件商品`,
-        timer: 1500,
-        showConfirmButton: false
-    });
+        Swal.fire({
+            icon: 'success',
+            title: '成功加入購物車',
+            text: `已加入 ${buyQuantity.value} 件商品`,
+            timer: 1500,
+            showConfirmButton: false
+        });
+
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: '加入失敗',
+            text: '請檢察網路連線或登入狀態'
+        });
+    } 
 };
 </script>
 
@@ -66,14 +80,12 @@ const handleAddToCart = () => {
             <nav class="breadcrumb">首頁 / 質感選物 / {{ products.productName }}</nav>
             
             <h1 class="products-title">{{ products.productName }}</h1>
+            <p class="text-muted" style="font-size: 0.85rem;">商品編號：{{ products.productCode }}</p>
             <p class="products-price">NT$ {{ products.price }}</p>
             
             <hr class="divider" />
 
-            <div class="products-description">
-            <h3>商品描述</h3>
-            <p>{{ products.description }}</p>
-            </div>
+            
 
             <div class="purchase-section">
             <div class="stock-status">

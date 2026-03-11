@@ -29,10 +29,8 @@ const handleLogin = async () => {
     const response = await adminAPI.login(loginData);
     console.log('Admin login success:', response);
     
-    // 取得 admin 資訊及其 token
-    const adminData = response.data.admin;
-    const accessToken = response.data.accessToken;
-    const refreshToken = response.data.refreshToken;
+    // response.data 現在直接是 AdminResponse（Token 已由後端設為 HttpOnly Cookie）
+    const adminData = response.data;
     
     console.log('========== Admin Info ==========');
     console.log('Account:', adminData.account);
@@ -41,7 +39,7 @@ const handleLogin = async () => {
     console.log('===============================');
     
     // 使用 Pinia store 進行登入狀態管理
-    adminAuthStore.login(adminData, accessToken, refreshToken);
+    adminAuthStore.login(adminData);
     
     await Swal.fire({
       icon: 'success',
@@ -56,11 +54,10 @@ const handleLogin = async () => {
     
   } catch (error) {
     console.error('Admin login failed:', error);
-    const errorMsg = error.response?.data?.message || '登入失敗，請檢查帳號密碼';
     Swal.fire({
       icon: 'error',
       title: '登入失敗',
-      text: errorMsg,
+      text: '登入失敗，請檢查輸入是否正確',
       confirmButtonColor: '#1e3c72'
     });
   } finally {
@@ -115,7 +112,7 @@ const handleLogin = async () => {
           </BaseButton>
 
           <div class="text-center mt-2">
-            <button type="button" class="btn btn-link text-admin-primary small text-decoration-none fw-medium">
+            <button type="button" @click="router.push('/admin/forgot-password')" class="btn btn-link text-admin-primary small text-decoration-none fw-medium">
               忘記密碼？
             </button>
           </div>

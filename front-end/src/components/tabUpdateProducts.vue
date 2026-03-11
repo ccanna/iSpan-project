@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue';
 import { useProductsDepot } from '@/stores/productsDepot';
 import Swal from 'sweetalert2';
-import axios from 'axios';
+import apiWrapper from '@/api/config';
 
 const depot = useProductsDepot();
 const selectedId = ref('');
@@ -20,12 +20,12 @@ watch(selectedId, (newId) => {
 
 const handleUpdate = async () => {
     try{
-        const response = await axios.put(`http://localhost:8080/api/products/${editForm.value.id}`, {
+        const response = await apiWrapper.put(`/products/${editForm.value.id}`, {
                 productName: editForm.value.productName,
                 price: editForm.value.price,
                 image: editForm.value.image,
                 description: editForm.value.description,
-                availableQuantity: editForm.value.availableQuantity
+                stock: editForm.value.stock
             
         });
 
@@ -39,6 +39,9 @@ const handleUpdate = async () => {
                     title: '商品更新成功',
                     timer: 1500
                 });
+
+                selectedId.value = ''
+                editForm.value = null
             }
     } catch (error) {
         console.error("更新失敗", error);
@@ -62,8 +65,8 @@ const handleUpdate = async () => {
 
 
 // 執行刪除
-const confirmDelete = (item) => {
-    Swal.fire({
+const confirmDelete  = async (item) => {
+    const result = await Swal.fire({
         title: '確定要刪除嗎？',
         text: `商品「${item.productName}」刪除後將無法還原！`,
         icon: 'warning',
@@ -72,18 +75,35 @@ const confirmDelete = (item) => {
         cancelButtonColor: '#3085d6',
         confirmButtonText: '是的，刪除它',
         cancelButtonText: '取消'
-    }).then((result) => {
+    })
         if (result.isConfirmed) {
-            depot.deleteProduct(item.id);
-            Swal.fire('已刪除', '該商品已從清單中移除', 'success');
-        }
+            try{
+                await depot.deleteProduct(item.id);
 
+                await Swal.fire({
+                    icon:'success',
+                    title:'已刪除',
+                    text: '該商品已從資料庫清單中移除',
+                    timer:1500
+                })
+            
+    
         // 2. 回到初始狀態：清空 ID 與 表單
             selectedId.value = ''; // 這會觸發 watch，讓 editForm 變回 null
             editForm.value = null; 
+            editValue.value = 0;
             
+
+        } catch (error){
+
+            Swal.fire({
+                icon:'error',
+                title:'刪除失敗',
+                test:'此商品可能已被預訂、無法刪除'
+            });
+        }     
             
-    });
+    }
 }
 
 
