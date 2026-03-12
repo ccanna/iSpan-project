@@ -51,14 +51,14 @@ const minDate = `${year}-${month}-${day}`;
             <table class="table table-hover gdg-table">
             <thead>
                 <tr>
-                    <th style="width: 100px;">訂位編號</th>
-                    <th v-if="role === 'user'" style="width: 150px;">餐廳</th>
-                    <th>姓名</th>
-                    <th>電話</th>
-                    <th style="width: 160px;">日期</th>
-                    <th style="width: 130px;">時間</th>
-                    <th style="width: 80px;">人數</th>
-                    <th style="width: 180px;">操作</th>
+                    <th style="min-width: 80px;">訂位編號</th>
+                    <th v-if="role === 'user'" style="min-width: 150px;">餐廳</th>
+                    <th style="min-width: 100px;">姓名</th>
+                    <th style="min-width: 120px;">電話</th>
+                    <th style="min-width: 160px;">日期</th>
+                    <th style="min-width: 140px;">時間</th>
+                    <th style="min-width: 80px;">人數</th>
+                    <th style="min-width: 160px;">操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -128,8 +128,7 @@ const minDate = `${year}-${month}-${day}`;
 
 <style scoped>
 .gdg-table {
-    table-layout: fixed;
-    /* 強制固定列寬，防止內容撐開 */
+    /* 移除 table-layout: fixed 讓表格能根據內容伸縮 */
     border-collapse: collapse;
     width: 100%;
 }
