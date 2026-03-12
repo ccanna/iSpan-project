@@ -4,15 +4,16 @@ import { useProductsDepot } from '@/stores/productsDepot';
 import Swal from 'sweetalert2';
 
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import BaseCard from '@/components/common/BaseCard.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
 import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const route = useRoute();
 const cartStore = useCartStore()
 const depot = useProductsDepot();
-const searchKeyword = ref('')
+const searchKeyword = ref(route.query.search || '')
 const activeCategory = ref('全部')
 const categories = ['全部', '生鮮', '食品', '日常用品']
 
