@@ -119,13 +119,13 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private void seedCategories() {
         if (categoryRepository.count() == 0) {
-            List<String> categories = Arrays.asList("提供插座", "寵物友善", "無障礙設施", "有停車場", "素食餐點");
+            List<String> categories = Arrays.asList("親子友善", "寵物友善", "綠色宣言餐廳", "公平貿易咖啡豆", "蔬食", "無障礙設施", "有停車場", "提供插座");
             for (String catName : categories) {
                 Category category = new Category();
                 category.setCategoryName(catName);
                 categoryRepository.save(category);
             }
-            System.out.println("Seeded 5 Categories.");
+            System.out.println("Seeded 8 Categories.");
         }
     }
 
@@ -341,7 +341,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
 
         System.out.println("Starting to seed feedbacks...");
-        
+
         FeedbackStatus status = feedbackStatusRepository.findAll().stream()
                 .filter(s -> s.getStatusName().equals("待處理"))
                 .findFirst().orElse(null);
@@ -350,11 +350,11 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         // 1. User A~E (userId 1~5)
         String[][] userFeedbacks = {
-                {"介面設計很清爽，特別喜歡地圖篩選功能，能快速找到附近隱藏的排隊名店，希望未來能增加收藏夾分類。", "意見回饋"},
-                {"建議在餐廳頁面增加「素食友善」的標籤，這樣帶長輩聚餐時篩選會更方便，整體使用體驗非常流暢。", "意見回饋"},
-                {"饗島的懶人包推薦非常有深度，不是那種常見的業配文，希望能持續更新更多關於台灣在地小吃的專題。", "意見回饋"},
-                {"訂位系統反應很快，送出申請後馬上就收到簡訊確認，當天到店出示畫面就能入座，完全不用排隊。", "餐廳訂位"},
-                {"幫全家人預約了週末的熱炒店，系統自動提醒功能很貼心，對於我們這種常忘記時間的人來說非常實用。", "餐廳訂位"}
+                { "介面設計很清爽，特別喜歡地圖篩選功能，能快速找到附近隱藏的排隊名店，希望未來能增加收藏夾分類。", "意見回饋" },
+                { "建議在餐廳頁面增加「素食友善」的標籤，這樣帶長輩聚餐時篩選會更方便，整體使用體驗非常流暢。", "意見回饋" },
+                { "饗島的懶人包推薦非常有深度，不是那種常見的業配文，希望能持續更新更多關於台灣在地小吃的專題。", "意見回饋" },
+                { "訂位系統反應很快，送出申請後馬上就收到簡訊確認，當天到店出示畫面就能入座，完全不用排隊。", "餐廳訂位" },
+                { "幫全家人預約了週末的熱炒店，系統自動提醒功能很貼心，對於我們這種常忘記時間的人來說非常實用。", "餐廳訂位" }
         };
 
         int count = 1;
@@ -368,7 +368,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 fb.setPhone("0900-111-22" + i);
                 fb.setContents(userFeedbacks[i][0]);
                 final int index = i;
-                fb.setFeedbackTypes(allTypes.stream().filter(t -> t.getTypeName().equals(userFeedbacks[index][1])).findFirst().orElse(null));
+                fb.setFeedbackTypes(allTypes.stream().filter(t -> t.getTypeName().equals(userFeedbacks[index][1]))
+                        .findFirst().orElse(null));
                 fb.setFeedbackStatus(status);
                 fb.setUser(user);
                 feedbackRepository.save(fb);
@@ -378,16 +379,25 @@ public class DatabaseSeeder implements CommandLineRunner {
         // 2. Anonymous feedback
         // 姓名, Email, Phone, Contents, Type
         String[][] anonymousData = {
-                {"陳志明", "cm.chen88@gmail.com", "0912-345-678", "介面操作直覺，連家裡的長輩都能自己操作訂位，這點對推廣在地美食真的很有幫助，非常推薦。", "餐廳訂位"},
-                {"Lin, Sophia", "sophia.lin_tw@outlook.com", "0921-987-654", "在商城買的在地小農伴手禮包裝得很精美，配送速度也比預期快，能在平台上一站式購足美食真的很方便。", "商品訂單"},
-                {"王大同", "tatung.wang@islandfood.com.tw", "0933-111-222", "買了饗島推薦的麻辣火鍋湯底，味道跟在店裡吃的一模一樣，物流過程商品保護得很好，沒有滲漏情形。", "商品訂單"},
-                {"Chang, Kevin", "kevin_chang99@me.com", "0955-888-777", "這次訂購的冷凍宅配組出貨通知很即時，讓我可以準確預約收貨時間，是值得信賴的電商購物體驗。", "商品訂單"},
-                {"李美玲", "meiling_li_1985@yahoo.com.tw", "0910-555-444", "剛才嘗試在上傳評論照片時，App 出現閃退狀況，我的手機型號是 iPhone 15，希望開發團隊能協助排查。", "問題通報"},
-                {"Wu, Jessica", "jessy.wu@protonmail.com", "0972-333-666", "發現地圖上某家牛肉麵店的營業時間與實際不符，店面似乎已經搬遷，請確認資訊並更新，以免其他用戶撲空。", "問題通報"},
-                {"黃小龍", "dragon.huang_official@gmail.com", "0988-168-168", "在進行訂單付款時，頁面跳轉至第三方支付偶爾會卡住，建議優化金流串接的穩定度，避免重複扣款疑慮。", "問題通報"},
-                {"Hsu, Peter", "peter_hsu_tech@fastmail.com", "0928-456-123", "饗島真的是吃貨救星！客服回覆問題專業且充滿溫度，能感覺到團隊是真的熱愛台灣美食，加油！", "表揚讚美"},
-                {"蔡雅婷", "yating.tsai_foodie@gmail.com", "0963-777-999", "感謝饗島幫我找到家鄉失傳已久的味道，那個地圖定位精準度真的沒話說，是我手機裡最重要的 App。", "表揚讚美"},
-                {"Yang, David", "d.yang_taiwan@icloud.com", "0919-222-333", "這次透過平台安排的環島美食行程大受好評，整合地圖與訂位的設計太聰明了，謝謝你們開發這麼棒的工具。", "表揚讚美"}
+                { "陳志明", "cm.chen88@gmail.com", "0912-345-678", "介面操作直覺，連家裡的長輩都能自己操作訂位，這點對推廣在地美食真的很有幫助，非常推薦。", "餐廳訂位" },
+                { "Lin, Sophia", "sophia.lin_tw@outlook.com", "0921-987-654",
+                        "在商城買的在地小農伴手禮包裝得很精美，配送速度也比預期快，能在平台上一站式購足美食真的很方便。", "商品訂單" },
+                { "王大同", "tatung.wang@islandfood.com.tw", "0933-111-222",
+                        "買了饗島推薦的麻辣火鍋湯底，味道跟在店裡吃的一模一樣，物流過程商品保護得很好，沒有滲漏情形。", "商品訂單" },
+                { "Chang, Kevin", "kevin_chang99@me.com", "0955-888-777",
+                        "這次訂購的冷凍宅配組出貨通知很即時，讓我可以準確預約收貨時間，是值得信賴的電商購物體驗。", "商品訂單" },
+                { "李美玲", "meiling_li_1985@yahoo.com.tw", "0910-555-444",
+                        "剛才嘗試在上傳評論照片時，App 出現閃退狀況，我的手機型號是 iPhone 15，希望開發團隊能協助排查。", "問題通報" },
+                { "Wu, Jessica", "jessy.wu@protonmail.com", "0972-333-666",
+                        "發現地圖上某家牛肉麵店的營業時間與實際不符，店面似乎已經搬遷，請確認資訊並更新，以免其他用戶撲空。", "問題通報" },
+                { "黃小龍", "dragon.huang_official@gmail.com", "0988-168-168",
+                        "在進行訂單付款時，頁面跳轉至第三方支付偶爾會卡住，建議優化金流串接的穩定度，避免重複扣款疑慮。", "問題通報" },
+                { "Hsu, Peter", "peter_hsu_tech@fastmail.com", "0928-456-123",
+                        "饗島真的是吃貨救星！客服回覆問題專業且充滿溫度，能感覺到團隊是真的熱愛台灣美食，加油！", "表揚讚美" },
+                { "蔡雅婷", "yating.tsai_foodie@gmail.com", "0963-777-999",
+                        "感謝饗島幫我找到家鄉失傳已久的味道，那個地圖定位精準度真的沒話說，是我手機裡最重要的 App。", "表揚讚美" },
+                { "Yang, David", "d.yang_taiwan@icloud.com", "0919-222-333",
+                        "這次透過平台安排的環島美食行程大受好評，整合地圖與訂位的設計太聰明了，謝謝你們開發這麼棒的工具。", "表揚讚美" }
         };
 
         for (String[] data : anonymousData) {
@@ -397,7 +407,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             fb.setEmail(data[1]);
             fb.setPhone(data[2]);
             fb.setContents(data[3]);
-            fb.setFeedbackTypes(allTypes.stream().filter(t -> t.getTypeName().equals(data[4])).findFirst().orElse(null));
+            fb.setFeedbackTypes(
+                    allTypes.stream().filter(t -> t.getTypeName().equals(data[4])).findFirst().orElse(null));
             fb.setFeedbackStatus(status);
             feedbackRepository.save(fb);
         }
