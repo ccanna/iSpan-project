@@ -295,10 +295,10 @@ public class DatabaseSeeder implements CommandLineRunner {
             "如同漫步於雨後的森林小徑，這是一款視覺與味覺雙重享受的甜點。\r\n" + //
             "\r\n" + //
             "我們選用優質天然發酵奶油製作塔皮，搭配香氣濃郁的本土萊姆，打造出絲滑細緻的內餡。塔面裝飾如同一座繽紛的小花園，莓果的微酸與檸檬的清新完美融合，每一口都能感受到大自然的原始鮮甜。適合與一杯熱紅花茶共同享用，讓下午茶時光變得優雅且放鬆。\r\n" + //
-            "", 50, "/productPictures/cake.jpg");
+            "", 10, "/productPictures/cake.jpg");
 
         saveProduct("限量小農鮮蔬盒", "生鮮", new BigDecimal("499"),
-            "嚴選在地小農友善耕作蔬菜，新鮮現採直送。無毒栽培降低農藥殘留風險，吃得更安心。支持在地農業同時減少長途運輸碳排放。", 50, "/productPictures/VeggieBox.jpg");
+            "嚴選在地小農友善耕作蔬菜，新鮮現採直送。無毒栽培降低農藥殘留風險，吃得更安心。支持在地農業同時減少長途運輸碳排放。", 2, "/productPictures/VeggieBox.jpg");
 
         saveProduct("【季節限定】柿柿如意鮮果禮盒", "生鮮", new BigDecimal("799"),
             "精選當季新鮮柿子，由在地農民用心栽種。自然熟成風味香甜，無過度人工催熟處理。產地直送縮短運輸流程，保留最佳鮮度。", 30, "/productPictures/persimmon.jpg");
