@@ -53,7 +53,8 @@ function doRefresh(isAdminContext) {
     }
 
     console.log(`[REFRESH] 啟動新 refresh → ${endpoint}`);
-    state.promise = rawApi.post(`${BASE_URL}${endpoint}`)
+    // 使用相對路徑讓 rawApi 的 request interceptor 可正確判斷 X-Context-Hint
+    state.promise = rawApi.post(endpoint)
         .then(() => {
             console.log('[REFRESH] 成功，Cookie 已更新');
             state.timestamp = Date.now();
@@ -70,12 +71,22 @@ function doRefresh(isAdminContext) {
 }
 
 // 設定 Context Hint 的邏輯
+// 注意：config.url 可能是相對路徑（如 '/admins/me'）或完整 URL（舊版 rawApi），
+// 因此需要相容兩種形式來正確判斷上下文
 const addContextHint = (config) => {
-    if (config.url?.startsWith('/admins')) {
+    const url = config.url || '';
+    // 相容完整 URL 或相對路徑
+    const isAdminUrl = url.includes('/admins') || url.includes('/feedbackList') || url.includes('/review');
+    const isUserUrl = url.includes('/auth') || url.includes('/owner');
+
+    if (isAdminUrl && !isUserUrl) {
         config.headers['X-Context-Hint'] = 'ADMIN';
-    } else if (config.url?.startsWith('/auth')) {
+    } else if (isUserUrl) {
+        // /owner/** 和 /auth/** 明確標記為 USER，
+        // 即使在 /admin 頁面也不受影響（防止頁面切換中的 race condition）
         config.headers['X-Context-Hint'] = 'USER';
     } else {
+        // 其他 API（如 /products, /bookings 等）依據目前的頁面路徑判斷
         const isAdminPage = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
         config.headers['X-Context-Hint'] = isAdminPage ? 'ADMIN' : 'USER';
     }

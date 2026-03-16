@@ -12,10 +12,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import jakarta.servlet.http.Cookie;
 import org.springframework.web.util.WebUtils;
@@ -35,13 +32,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 取得當前請求「應該」使用的唯一 Token
             String jwt = getTargetJwt(request);
 
-            if (jwt != null && tokenProvider.validateToken(jwt)) {
-                String email = tokenProvider.getEmailFromToken(jwt);
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (jwt != null) {
+                if (tokenProvider.validateToken(jwt)) {
+                    String email = tokenProvider.getEmailFromToken(jwt);
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    // Token 存在但無效（過期、簽名錯誤等），必須明確回傳 401
+                    // 不能靜默繼續，否則後續的 .anyRequest().authenticated() 會拋 403
+                    // 前端的 Refresh 攔截器只會處理 401，因此不回 401 就無法自動 refresh
+                    logger.warn("[JwtAuth] Token 存在但驗證失敗，path=" + request.getRequestURI() + "，回傳 401");
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"success\":false,\"message\":\"Token expired or invalid\"}");
+                    return;
+                }
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
