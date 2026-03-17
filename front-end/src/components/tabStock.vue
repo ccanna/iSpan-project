@@ -53,7 +53,6 @@ const displayTime = (item) => {
 <template>
 
 
-<!-- Recent Orders Table -->
 
     <div class="content-card">
         <div class="card-header">

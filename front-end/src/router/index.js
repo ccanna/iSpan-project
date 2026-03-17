@@ -386,28 +386,6 @@ router.beforeEach(async (to, from, next) => {
 
 
 
-  //   //Anna改的，為了將目標登入後保留原始路徑返回前頁
-  //   if (to.meta.requiresAuth) {
-  //     if (authStore.isExpired || !authStore.isLoggedIn) {
-  //       sessionStorage.setItem('redirectPath', to.fullPath);        //將當前目標路徑存入瀏覽器站存
-
-
-  //       await authStore.handleLogoutAndNotify(authStore.isExpired ? 'timeout' : 'unauthorized');
-  //       return next({ name: 'Login', query: { redirect: to.fullPath } });
-  //     }
-  //   }
-
-  //   //當使用者從/login登入成功切換出來時，自動攔截並導向
-  //   if (from.path === '/login' && authStore.isLoggedIn) {
-  //     const savedPath = sessionStorage.getItem('redirectPath');
-  //     if (savedPath) {
-  //       sessionStorage.removeItem('redirectPath');
-  //       return next({ name: 'Login', query: { redirect: to.fullPath } });
-  //     }
-  //   }
-  //   next();
-
-  // });
 
 
   if (to.meta.requiresAuth) {

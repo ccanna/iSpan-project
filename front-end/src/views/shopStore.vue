@@ -13,7 +13,6 @@ import OrderToast from '@/components/OrderToast.vue'
 const depot = useProductsDepot();
 const router =useRouter();
 const goToCart = () => {
-  // 括號內填寫在 router/index.js 設定的 path
     router.push('/cart') 
 }
 

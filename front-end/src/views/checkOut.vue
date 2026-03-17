@@ -92,7 +92,7 @@ const openStoreMap = async (storeType) => {
 const handleMessage = (event) => {
     console.log('收到消息事件:', event.data, '來源:', event.origin);
     
-    // 確認消息來自 ngrok URL 或本地後端
+    // 確認消息來自 ngrok URL 
     if (!event.origin.includes('ngrok') && 
         !event.origin.includes('localhost') && 
         !event.origin.includes('8080')) {
@@ -183,7 +183,6 @@ onMounted( async () => {
     });
 
     setTimeout(() => {
-        // 用 name 屬性選取，而不是 class
         const countyEl = document.querySelector('#twzipcode select[name="county"]')
         const districtEl = document.querySelector('#twzipcode select[name="district"]')
         const zipcodeEl = document.querySelector('#twzipcode input[name="zipcode"]')

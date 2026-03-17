@@ -5,7 +5,7 @@ import apiWrapper from '@/api/config'
 
 const orders = ref([])
 const filterStatus = ref('全部')
-const sortOrder = ref('desc') // 新增排序
+const sortOrder = ref('desc') 
 const editingOrder = ref(null)
 const selectedOrder = ref(null)
 
