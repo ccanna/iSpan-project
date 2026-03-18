@@ -124,12 +124,12 @@ const routes = [
         name: 'Feedback',
         meta: { title: '聯絡我們' }
       },
-      {
-        path: 'feedbackAP',
-        component: () => import('@/views/FeedbackAPView.vue'),
-        name: 'FeedbackAP',
-        meta: { title: '客服管理後台' }
-      },
+      // {
+      //   path: 'feedbackAP',
+      //   component: () => import('@/views/FeedbackAPView.vue'),
+      //   name: 'FeedbackAP',
+      //   meta: { title: '客服管理後台' }
+      // },
       {
         path: 'productsDetail/:id',
         component: () => import('@/views/ProductsDetail.vue'),
