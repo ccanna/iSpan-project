@@ -42,6 +42,7 @@ const routes = [
             path: 'orders',
             name: 'UserOrders',
             component: () => import('@/views/UserInfoOrders.vue'),
+            meta: { title: '我的訂單' }
           },
           {
             path: 'store-registration',
@@ -65,14 +66,16 @@ const routes = [
       },
       {
         path: '/shopStore',
-        component: () => import('@/views/shopStore.vue'),
-        name: 'ShopStore'
+        component: () => import('@/views/ShopStore.vue'),
+        name: 'ShopStore',
+        meta: { title: '質感選物' }
       },
       {
         path: '/Cart',
-        component: () => import('@/views/shopCart.vue'),
+        component: () => import('@/views/ShopCart.vue'),
         name: 'ShopCart',
         // meta: { requiresAuth: true }
+        meta: { title: '購物車' }
       },
       {
         path: '/storeInfo/reservation/:id',
@@ -129,14 +132,16 @@ const routes = [
       },
       {
         path: 'productsDetail/:id',
-        component: () => import('@/views/productsDetail.vue'),
-        name: 'productsDetail'
+        component: () => import('@/views/ProductsDetail.vue'),
+        name: 'productsDetail',
+        meta: { title: '商品介紹' }
 
       },
       {
         path: 'checkOut',
-        component: () => import('@/views/checkOut.vue'),
+        component: () => import('@/views/Checkout.vue'),
         name: 'checkOut',
+        meta: { title: '結帳' }
       },
       {
         path: 'getusertest',
@@ -146,7 +151,8 @@ const routes = [
       {
         path: '/payment-result',
         component: () => import('@/views/PaymentResult.vue'),
-        name: 'PaymentResult'
+        name: 'PaymentResult',
+        meta: { title: '結帳結果' }
       }
     ]
   },
@@ -255,13 +261,15 @@ const routes = [
         path: 'backEnd/productsList',
         name: 'BackEndProductsList',
         component: () => import('@/views/BackEndProductsList.vue'),
-        meta: { roles: ['SUPER_ADMIN', 'SHOP_MANAGER'] }
+        meta: { roles: ['SUPER_ADMIN', 'SHOP_MANAGER'] },
+        meta: { title: '管理 | 商品&庫存' }
       },
       {
         path: 'backEnd/productsOrders',
         name: 'BackEndproductsOrders',
         component: () => import('@/views/BackEndproductsOrders.vue'),
-        meta: { roles: ['SUPER_ADMIN', 'SHOP_MANAGER'] }
+        meta: { roles: ['SUPER_ADMIN', 'SHOP_MANAGER'] },
+        meta: { title: '管理 | 訂單紀錄' }
       },
       {
         path: 'feedbackAP',
@@ -391,28 +399,6 @@ router.beforeEach(async (to, from, next) => {
 
 
 
-  //   //Anna改的，為了將目標登入後保留原始路徑返回前頁
-  //   if (to.meta.requiresAuth) {
-  //     if (authStore.isExpired || !authStore.isLoggedIn) {
-  //       sessionStorage.setItem('redirectPath', to.fullPath);        //將當前目標路徑存入瀏覽器站存
-
-
-  //       await authStore.handleLogoutAndNotify(authStore.isExpired ? 'timeout' : 'unauthorized');
-  //       return next({ name: 'Login', query: { redirect: to.fullPath } });
-  //     }
-  //   }
-
-  //   //當使用者從/login登入成功切換出來時，自動攔截並導向
-  //   if (from.path === '/login' && authStore.isLoggedIn) {
-  //     const savedPath = sessionStorage.getItem('redirectPath');
-  //     if (savedPath) {
-  //       sessionStorage.removeItem('redirectPath');
-  //       return next({ name: 'Login', query: { redirect: to.fullPath } });
-  //     }
-  //   }
-  //   next();
-
-  // });
 
 
   if (to.meta.requiresAuth) {
