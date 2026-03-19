@@ -146,11 +146,12 @@
     <div class="admin-main" :class="{ expanded: sidebarCollapsed }">
       <!-- Top Header -->
       <header class="admin-header">
-        <!-- <div class="header-left">
+        <div class="header-left">
           <button class="menu-toggle" @click="toggleMobileSidebar">
             <i class="bi bi-list"></i>
           </button>
           
+          <!--
           <nav class="breadcrumb-nav">
             <ol class="breadcrumb">
               <li class="breadcrumb-item"><a href="#">首頁</a></li>
@@ -158,12 +159,14 @@
               <li class="breadcrumb-item active" v-if="currentPage">{{ currentPage }}</li>
             </ol>
           </nav>
-        </div> -->
+          -->
+        </div>
 
         <div class="header-right">
           <div class="user-menu-container">
             <div class="user-menu">
               <!-- <img src="https://via.placeholder.com/40" alt="User" class="user-avatar"> -->
+              <span class="badge bg-secondary">{{ positionName }}</span>
               <span class="user-name">{{ adminName || '管理員' }}</span>
               <i class="bi bi-chevron-down"></i>
             </div>
@@ -206,7 +209,17 @@ export default {
     const adminAuthStore = useAdminAuthStore();
     
     // 使用 storeToRefs 保持響應性
-    const { adminName } = storeToRefs(adminAuthStore);
+    const { adminName, adminPosition } = storeToRefs(adminAuthStore);
+
+    const positionName = computed(() => {
+      switch (adminPosition.value) {
+        case 'SUPER_ADMIN': return '超級管理員';
+        case 'CUSTOMER_SERVICE': return '客服管理員';
+        case 'SHOP_MANAGER': return '商品管理員';
+        case 'HUMAN_RESOURCE': return '人資管理員';
+        default: return adminPosition.value || '管理員';
+      }
+    });
     
     const sidebarCollapsed = ref(false);
     const openSubmenu = ref(null);
@@ -279,6 +292,7 @@ export default {
       currentSection,
       currentPage,
       adminName,
+      positionName,
       handleLogout,
       adminAuthStore
     };
@@ -475,6 +489,7 @@ export default {
 // Main Content Area
 .admin-main {
   flex: 1;
+  min-width: 0;
   margin-left: 250px;
   display: flex;
   flex-direction: column;
