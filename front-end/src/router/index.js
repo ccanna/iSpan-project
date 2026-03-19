@@ -13,6 +13,7 @@ const routes = [
         path: '',
         name: 'Home',
         component: () => import('@/views/HomeView.vue'),
+        meta: { title: '饗島' }
       },
       {
         path: 'login',
@@ -50,7 +51,8 @@ const routes = [
           {
             path: 'feedback',
             name: 'UserInfoFeedback',
-            component: () => import('@/views/UserInfoFeedbackView.vue')
+            component: () => import('@/views/UserInfoFeedbackView.vue'),
+            meta: { title: '我的回饋' }
           }
         ]
       },
@@ -62,12 +64,12 @@ const routes = [
       },
       {
         path: '/shopStore',
-        component: () => import('@/views/shopStore.vue'),
+        component: () => import('@/views/ShopStore.vue'),
         name: 'ShopStore'
       },
       {
         path: '/Cart',
-        component: () => import('@/views/shopCart.vue'),
+        component: () => import('@/views/ShopCart.vue'),
         name: 'ShopCart',
         // meta: { requiresAuth: true }
       },
@@ -107,32 +109,36 @@ const routes = [
       {
         path: '/about',
         component: () => import('@/views/AboutView.vue'),
-        name: 'About'
+        name: 'About',
+        meta: { title: '島嶼初心' }
       },
       {
         path: '/mapSearch',
         component: () => import('@/views/MapSearchView.vue'),
-        name: 'MapSearch'
+        name: 'MapSearch',
+        meta: { title: '美味座標' }
       },
       {
         path: '/feedback',
         component: () => import('@/views/FeedbackView.vue'),
-        name: 'Feedback'
+        name: 'Feedback',
+        meta: { title: '聯絡我們' }
       },
-      {
-        path: 'feedbackAP',
-        component: () => import('@/views/FeedbackAPView.vue'),
-        name: 'FeedbackAP'
-      },
+      // {
+      //   path: 'feedbackAP',
+      //   component: () => import('@/views/FeedbackAPView.vue'),
+      //   name: 'FeedbackAP',
+      //   meta: { title: '客服管理後台' }
+      // },
       {
         path: 'productsDetail/:id',
-        component: () => import('@/views/productsDetail.vue'),
+        component: () => import('@/views/ProductsDetail.vue'),
         name: 'productsDetail'
 
       },
       {
         path: 'checkOut',
-        component: () => import('@/views/checkOut.vue'),
+        component: () => import('@/views/Checkout.vue'),
         name: 'checkOut',
       },
       {
@@ -264,7 +270,7 @@ const routes = [
         path: 'feedbackAP',
         name: 'FeedbackAP',
         component: () => import('@/views/FeedbackAPView.vue'),
-        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'] }
+        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'], title: '客服管理後台' }
       },
       {
         path: 'admins/list',
@@ -366,7 +372,7 @@ router.beforeEach(async (to, from, next) => {
           text: '您沒有訪問此頁面的權限',
           confirmButtonColor: '#1e3c72'
         });
-        
+
         const position = adminAuthStore.admin?.position;
         let redirectTo = '/admin';
         if (position === 'SUPER_ADMIN' || position === 'HUMAN_RESOURCE') {
@@ -376,7 +382,7 @@ router.beforeEach(async (to, from, next) => {
         } else if (position === 'SHOP_MANAGER') {
           redirectTo = '/admin/backEnd/productsList';
         }
-        
+
         return next(redirectTo); // 依據職位導向對應首頁
       }
       console.log('[Router Admin] Role check 通過 ✅');
@@ -386,28 +392,6 @@ router.beforeEach(async (to, from, next) => {
 
 
 
-  //   //Anna改的，為了將目標登入後保留原始路徑返回前頁
-  //   if (to.meta.requiresAuth) {
-  //     if (authStore.isExpired || !authStore.isLoggedIn) {
-  //       sessionStorage.setItem('redirectPath', to.fullPath);        //將當前目標路徑存入瀏覽器站存
-
-
-  //       await authStore.handleLogoutAndNotify(authStore.isExpired ? 'timeout' : 'unauthorized');
-  //       return next({ name: 'Login', query: { redirect: to.fullPath } });
-  //     }
-  //   }
-
-  //   //當使用者從/login登入成功切換出來時，自動攔截並導向
-  //   if (from.path === '/login' && authStore.isLoggedIn) {
-  //     const savedPath = sessionStorage.getItem('redirectPath');
-  //     if (savedPath) {
-  //       sessionStorage.removeItem('redirectPath');
-  //       return next({ name: 'Login', query: { redirect: to.fullPath } });
-  //     }
-  //   }
-  //   next();
-
-  // });
 
 
   if (to.meta.requiresAuth) {
@@ -452,6 +436,14 @@ router.beforeEach(async (to, from, next) => {
     }
   }
   next();
+});
+
+router.afterEach((to) => {
+  if (to.meta.title) {
+    document.title = to.meta.title;
+  } else {
+    document.title = 'ViteApp';
+  }
 });
 
 export default router;
