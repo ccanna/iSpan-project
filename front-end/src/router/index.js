@@ -30,7 +30,8 @@ const routes = [
             path: 'profile',
             name: 'UserProfile',
             component: () => import('@/views/UserInfoContent.vue'),
-            props: { title: '個人資料' }
+            props: { title: '個人資料' },
+            meta: { title: '個人資料' }
           },
           {
             path: 'bookings',
@@ -45,12 +46,14 @@ const routes = [
           {
             path: 'store-registration',
             name: 'UserInfoStoreReg',
-            component: () => import('@/views/UserInfoStoreReg.vue')
+            component: () => import('@/views/UserInfoStoreReg.vue'),
+            meta: { title: '我的訊息' }
           },
           {
             path: 'feedback',
             name: 'UserInfoFeedback',
-            component: () => import('@/views/UserInfoFeedbackView.vue')
+            component: () => import('@/views/UserInfoFeedbackView.vue'),
+            meta: { title: '意見回饋' }
           }
         ]
       },
@@ -240,13 +243,13 @@ const routes = [
         path: 'users/list',
         name: 'AdminUsersList',
         component: () => import('@/views/UserListView.vue'),
-        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'] }
+        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'], title: '使用者列表' }
       },
       {
         path: 'users/storeRegistration',
         name: 'StoreRegistrationCheck',
         component: () => import('@/views/StoreRegistrationCheckView.vue'),
-        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'] }
+        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'], title: '店家註冊審核' }
       },
       {
         path: 'backEnd/productsList',
@@ -272,7 +275,8 @@ const routes = [
         component: () => import('@/views/AdminListView.vue'),
         meta: {
           requiresAdminAuth: true,
-          roles: ['SUPER_ADMIN', 'HUMAN_RESOURCE']
+          roles: ['SUPER_ADMIN', 'HUMAN_RESOURCE'],
+          title: '管理員列表'
         }
       }
     ]
@@ -316,6 +320,7 @@ import { useCartStore } from '@/stores/cart';
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const adminAuthStore = useAdminAuthStore();
+  document.title = to.meta.title || '饗島';
 
 
   //for登出入狀態攔截，顯示購物車
@@ -366,7 +371,7 @@ router.beforeEach(async (to, from, next) => {
           text: '您沒有訪問此頁面的權限',
           confirmButtonColor: '#1e3c72'
         });
-        
+
         const position = adminAuthStore.admin?.position;
         let redirectTo = '/admin';
         if (position === 'SUPER_ADMIN' || position === 'HUMAN_RESOURCE') {
@@ -376,7 +381,7 @@ router.beforeEach(async (to, from, next) => {
         } else if (position === 'SHOP_MANAGER') {
           redirectTo = '/admin/backEnd/productsList';
         }
-        
+
         return next(redirectTo); // 依據職位導向對應首頁
       }
       console.log('[Router Admin] Role check 通過 ✅');
@@ -431,7 +436,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     // Role-based restrictions for general users
-    if (to.meta.hideFromStore && authStore.isStoreUser) {
+    if (to.meta.hideFromStore && authStore.isStoreUser && !to.query.id) {
       Swal.fire({
         icon: 'info',
         title: '您已是商家',

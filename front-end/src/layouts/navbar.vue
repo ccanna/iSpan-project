@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useCartStore } from '@/stores/cart';
 import { useAuthStore } from '@/stores/auth';
 import { storeRegistrationAPI } from '@/api/storeRegistration';
@@ -8,9 +8,22 @@ import Swal from 'sweetalert2';
 
 
 const router = useRouter();
+const route = useRoute();
 const cartStore = useCartStore();
 const authStore = useAuthStore();
 const loading = ref(false);
+
+// 監聽路由變化，若在手機版展開的狀況下跳轉，自動收起 Navbar
+watch(() => route.fullPath, () => {
+  const navbarCollapse = document.getElementById('gdgNavbar');
+  const toggler = document.querySelector('.navbar-toggler');
+  // 檢查是否為展開狀態，且該按鈕為可見(手機版)
+  if (navbarCollapse && navbarCollapse.classList.contains('show') && toggler) {
+    if (window.getComputedStyle(toggler).display !== 'none') {
+        toggler.click(); // 透過模擬點擊按鈕觸發 Bootstrap 內建的收回動畫
+    }
+  }
+});
 
 const goToCart = async () => {
     if (!authStore.isLoggedIn) {
@@ -167,17 +180,23 @@ const handleMerchantApplication = () => {
         </a>
       </div>
 
-      <button 
-        class="navbar-toggler border-0" 
-        type="button" 
-        data-bs-toggle="collapse" 
-        data-bs-target="#gdgNavbar" 
-        aria-controls="gdgNavbar" 
-        aria-expanded="false" 
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <div class="d-flex align-items-center">
+        <!-- 手機版歡迎詞 -->
+        <div v-if="authStore.isLoggedIn" class="welcome-msg d-lg-none me-2 text-dark small fw-medium text-nowrap">
+          {{ authStore.userName }} 您好
+        </div>
+        <button 
+          class="navbar-toggler border-0" 
+          type="button" 
+          data-bs-toggle="collapse" 
+          data-bs-target="#gdgNavbar" 
+          aria-controls="gdgNavbar" 
+          aria-expanded="false" 
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
 
       <div class="collapse navbar-collapse" id="gdgNavbar">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -242,8 +261,8 @@ const handleMerchantApplication = () => {
 
         <!-- Right Side: Icons & Account -->
         <div class="nav-icons d-flex align-items-center" >
-          <!-- 歡迎詞區塊 -->
-          <div v-if="authStore.isLoggedIn" class="welcome-msg me-2 text-dark small fw-medium">
+          <!-- 歡迎詞區塊 (桌機版) -->
+          <div v-if="authStore.isLoggedIn" class="welcome-msg d-none d-lg-block me-2 text-dark small fw-medium">
             {{ authStore.userName }} 您好
           </div>
 
