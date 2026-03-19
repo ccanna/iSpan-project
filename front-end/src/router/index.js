@@ -75,29 +75,31 @@ const routes = [
         path: '/storeInfo/reservation/:id',
         name: 'Reservation',
         component: () => import('@/views/ReservationView.vue'),
+        meta: { title: '預約座位' }
       },
       {
         path: '/storeInfo/:id?',
         name: 'StoreInfo',
         component: () => import('@/views/StoreInfoView.vue'),
+        meta: { title: '商家資訊' }
       },
       {
         path: '/owner/storeInfo',
         name: 'OwnerStoreInfo',
         component: () => import('@/views/OwnerProfileView.vue'),
-        meta: { requiresAuth: true, requiresStore: true }
+        meta: { requiresAuth: true, requiresStore: true, title: '商家資訊編輯' }
       },
       {
         path: '/owner/bookings/seats',
         name: 'Seats',
         component: () => import('@/views/SeatsAndTimeView.vue'),
-        meta: { requiresAuth: true, requiresStore: true }
+        meta: { requiresAuth: true, requiresStore: true, title: '座位與時間' }
       },
       {
         path: '/owner/bookings/data',
         name: 'Data',
         component: () => import('@/views/BookingDataView.vue'),
-        meta: { requiresAuth: true, requiresStore: true }
+        meta: { requiresAuth: true, requiresStore: true, title: '訂位紀錄' }
       },
       // {
       //   path: '/home',
@@ -316,6 +318,7 @@ import { useCartStore } from '@/stores/cart';
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const adminAuthStore = useAdminAuthStore();
+  document.title = to.meta.title || '饗島';
 
 
   //for登出入狀態攔截，顯示購物車
