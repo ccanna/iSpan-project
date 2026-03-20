@@ -2,7 +2,7 @@
 
 <script setup>
 
-import storeCard from '@/components/StoreCard.vue'
+import StoreCard from '@/components/StoreCard.vue'
 import { useRouter} from 'vue-router'
 // import { useCartStore } from '@/stores/cart';
 import banner from '@/components/common/banner.vue'
