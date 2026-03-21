@@ -25,7 +25,6 @@
 
 - **其他套件**: 
   - `sweetalert2`: 用於優化的彈跳視窗與提示。
-  - `leaflet`: 用於地圖功能呈現。
   - `tw-city-selector`: 台灣縣市/鄉鎮區下拉選單。
 
 ### 後端 (Back-End)
@@ -60,7 +59,7 @@
 ### 3. 高內聚的後台管理介面 (商家後台)
 - **頁籤化 (Tab) 與元件化設計**: 後台的商品管理功能非常繁雜。為了避免單一頁面變成難以維護的「千行程式碼」，我將介面依據**功能職責**拆分為多個獨立的子元件：
   - `TabIncreaseProducts.vue` (新增商品)
-  - `TabStock.vue` / `tabStockCRUD.vue` (庫存盤點與庫存異動)
+  - `TabStock.vue` / `TabStockCRUD.vue` (庫存盤點與庫存異動)
   - `TabUpdateProducts.vue` (商品資訊更新)
 - **管理清單整合**: 實作 `BackEndProductsList.vue` 與 `BackEndproductsOrders.vue`，讓商家能以最具結構性且直覺的方式，管理上架商品以及檢視賣場訂單。
 
