@@ -32,7 +32,7 @@
 - **核心框架**: Java 17, Spring Boot 3.5.10
 - **資料存取**: Spring Data JPA, Hibernate
 - **資料庫**: MS SQL Server (JDBC)
-- **資安防護**: Spring Security, JWT (JSON Web Tokens)
+
 
 ---
 
